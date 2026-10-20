@@ -1,0 +1,13 @@
+---
+/** Cinta de precaución (amarillo/negro). DISENO.md: solo en 2 lugares del sitio. */
+interface Props {
+  texto: string;
+  /** Rotación en grados */
+  r?: number;
+}
+const { texto, r = -1.2 } = Astro.props;
+---
+
+<div class="precaucion" style={`--r:${r}deg`} role="presentation">
+  <span>{texto}</span>
+</div>

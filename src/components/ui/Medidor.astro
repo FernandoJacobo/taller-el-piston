@@ -1,0 +1,57 @@
+---
+/** Semáforo de urgencia dibujado como medidor de tablero (verde · ámbar · rojo). */
+import type { Urgencia } from '@/data/sintomas';
+import { urgencias } from '@/lib/diagnostico';
+
+interface Props {
+  nivel: Urgencia | null;
+}
+const { nivel } = Astro.props;
+const angulo = nivel ? urgencias[nivel].angulo : -88;
+
+// Arcos de 60° cada uno sobre un semicírculo de radio 44 con centro (60, 62)
+const punto = (g: number, r = 44) => {
+  const a = ((g - 90) * Math.PI) / 180;
+  return `${(60 + r * Math.cos(a)).toFixed(2)} ${(62 + r * Math.sin(a)).toFixed(2)}`;
+};
+const arco = (de: number, a: number) => `M${punto(de)} A44 44 0 0 1 ${punto(a)}`;
+---
+
+<svg class="medidor" viewBox="0 0 120 78" role="img" aria-label={nivel ? `Urgencia: ${urgencias[nivel].etiqueta}` : 'Medidor de urgencia sin lectura'}>
+  <g class="trazo" fill="none" stroke-linecap="butt">
+    <path d={arco(-88, -31)} stroke="var(--verde-ok)" stroke-width="11"></path>
+    <path d={arco(-29, 29)} stroke="var(--mostaza)" stroke-width="11"></path>
+    <path d={arco(31, 88)} stroke="var(--oxido)" stroke-width="11"></path>
+    <path d="M8 62 A52 52 0 0 1 112 62" stroke="var(--grasa)" stroke-width="2.5"></path>
+    <path d="M10 66 H110" stroke="var(--grasa)" stroke-width="3"></path>
+  </g>
+  <g class="aguja" style={`rotate: ${angulo}deg`}>
+    <path d="M60 62 L60 18" stroke="var(--grasa)" stroke-width="3.5" stroke-linecap="round"></path>
+  </g>
+  <circle cx="60" cy="62" r="6" fill="var(--grasa)"></circle>
+  <text x="18" y="76" class="t">OK</text>
+  <text x="102" y="76" class="t" text-anchor="end">ALTO</text>
+</svg>
+
+<style>
+  .medidor {
+    width: 100%;
+    overflow: visible;
+  }
+
+  .trazo {
+    filter: url(#trazo-mano);
+  }
+
+  .aguja {
+    transform-origin: 60px 62px;
+  }
+
+  .t {
+    font-family: var(--font-datos);
+    font-size: 8px;
+    font-weight: 700;
+    fill: var(--grasa);
+  }
+
+</style>

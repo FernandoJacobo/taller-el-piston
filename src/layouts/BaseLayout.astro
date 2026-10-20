@@ -1,0 +1,113 @@
+---
+import '@/styles/global.css';
+import { Font } from 'astro:assets';
+import { site } from '@/config/site';
+import { absoluteUrl, cleanPath } from '@/lib/schema';
+import Encabezado from '@/components/layout/Encabezado.astro';
+import Pie from '@/components/layout/Pie.astro';
+import BarraMovil from '@/components/layout/BarraMovil.astro';
+
+interface Props {
+  title?: string;
+  description?: string;
+  /** Ruta de la imagen OG dentro de public/ */
+  image?: string;
+  imageAlt?: string;
+  /** Recibe la URL absoluta de la imagen OG y devuelve los esquemas JSON-LD de la página */
+  jsonLd?: (ogImage: string) => object[];
+  noindex?: boolean;
+  /** Folio que aparece en el encabezado de la orden */
+  folio?: string;
+  /** Sin cinta de precaución antes del pie (DISENO.md: máximo 2 en el sitio) */
+  sinCinta?: boolean;
+}
+
+const {
+  title,
+  description = site.description,
+  image = '/og.jpg',
+  imageAlt = `Rótulo de ${site.name} sobre papel kraft con una llave de cruz`,
+  jsonLd,
+  noindex = false,
+  folio = '0001',
+  sinCinta = false,
+} = Astro.props;
+
+const path = cleanPath(Astro.url.pathname);
+const fullTitle = title ? `${title} | ${site.name}` : `${site.name} · Taller mecánico en ${site.address.neighborhood}, ${site.address.city}`;
+const canonical = absoluteUrl(path);
+const ogUrl = absoluteUrl(image);
+const schemas = jsonLd?.(ogUrl) ?? [];
+---
+
+<!doctype html>
+<html lang={site.locale}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex, follow" />}
+    <meta name="theme-color" content="#14120F" />
+    <meta name="color-scheme" content="only light" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <meta name="generator" content={Astro.generator} />
+
+    <script is:inline>
+      document.documentElement.classList.add('js');
+    </script>
+
+    <Font cssVariable="--fuente-rotulo" preload={[{ subset: 'latin', weight: 900 }]} />
+    <Font cssVariable="--fuente-cuerpo" preload={[{ subset: 'latin', weight: 400 }]} />
+    <Font cssVariable="--fuente-datos" />
+    <Font cssVariable="--fuente-plumon" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:locale" content={site.ogLocale} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogUrl} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={imageAlt} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogUrl} />
+    <meta name="twitter:image:alt" content={imageAlt} />
+
+    {schemas.map((s) => <script type="application/ld+json" set:html={JSON.stringify(s)} />)}
+    <slot name="head" />
+  </head>
+  <body>
+    <!-- Filtros compartidos: trazo a mano de las ilustraciones y textura de gis -->
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+      <filter id="trazo-mano" x="-5%" y="-5%" width="110%" height="110%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="3" result="ruido"></feTurbulence>
+        <feDisplacementMap in="SourceGraphic" in2="ruido" scale="2.4" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
+      </filter>
+      <filter id="trazo-gis">
+        <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="1" seed="9" result="grano"></feTurbulence>
+        <feColorMatrix in="grano" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -1.1 1.3" result="hoyos"></feColorMatrix>
+        <feComposite in="SourceGraphic" in2="hoyos" operator="in" result="gis"></feComposite>
+        <feDisplacementMap in="gis" in2="grano" scale="1.6" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
+      </filter>
+    </svg>
+
+    <a class="skip btn btn--papel" href="#contenido">Saltar al contenido</a>
+    <Encabezado folio={folio} path={path} />
+    <main id="contenido" tabindex="-1">
+      <slot />
+    </main>
+    <Pie sinCinta={sinCinta} />
+    <BarraMovil />
+
+    <script>
+      import '@/scripts/estampa';
+    </script>
+  </body>
+</html>

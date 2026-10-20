@@ -1,0 +1,231 @@
+---
+/** Footer: datos en tabla mono, mapa como foto pegada y el rótulo gigante cortado por el borde. */
+import { site, dayLabels, dayOrder, formatTime, fullAddress, mapEmbedUrl, mapLinkUrl, whatsappUrl } from '@/config/site';
+import Precaucion from '@/components/ui/Precaucion.astro';
+
+interface Props {
+  sinCinta?: boolean;
+}
+const { sinCinta = false } = Astro.props;
+---
+
+{!sinCinta && <Precaucion texto="Zona de trabajo · Pásale sin miedo" r={1.1} />}
+
+<footer class="pie pizarron">
+  <div class="contenedor rejilla">
+    <section class="bloque horario" aria-labelledby="pie-horario">
+      <h2 id="pie-horario" class="etiqueta">Horario de mostrador</h2>
+      <table class="datos">
+        <tbody>
+          {
+            dayOrder.map((d) => (
+              <tr>
+                <th scope="row">{dayLabels[d]}</th>
+                <td>{site.hours[d].length ? site.hours[d].map((s) => `${formatTime(s.open)} – ${formatTime(s.close)}`).join(', ') : 'Cerrado (y descansando)'}</td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+      <p class="pago">{site.payments}</p>
+    </section>
+
+    <section class="bloque contacto" aria-labelledby="pie-contacto">
+      <h2 id="pie-contacto" class="etiqueta">Dónde y cómo</h2>
+      <address>
+        <p>{fullAddress}</p>
+        <p class="ref">{site.address.reference}</p>
+        <p class="datos lineas">
+          <a class="subrayado" href={`tel:${site.contact.phone}`}>Tel. {site.contact.phoneDisplay}</a>
+          <a class="subrayado" href={whatsappUrl('Hola, les escribo desde su página.')} rel="noopener" target="_blank">WhatsApp</a>
+          <a class="subrayado" href={`mailto:${site.contact.email}`}>{site.contact.email}</a>
+        </p>
+      </address>
+      <ul class="enlaces datos">
+        <li><a class="subrayado" href="/servicios">Lista de precios</a></li>
+        <li><a class="subrayado" href="/presupuesto">Cotizador</a></li>
+        <li><a class="subrayado" href="/seguimiento">Así va tu auto</a></li>
+        <li><a class="subrayado" href="/aviso-de-privacidad">Aviso de privacidad</a></li>
+      </ul>
+    </section>
+
+    <figure class="bloque mapa">
+      <span class="cinta" style="--r:-5deg; --w:5.5rem; left:-1rem; top:-0.7rem"></span>
+      <span class="cinta" style="--r:7deg; --w:4.5rem; right:-0.8rem; bottom:1.6rem"></span>
+      <iframe
+        src={mapEmbedUrl}
+        title={`Mapa: ${site.name}, ${fullAddress}`}
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade"
+        width="400"
+        height="260"></iframe>
+      <figcaption class="datos">
+        <a class="subrayado" href={mapLinkUrl} rel="noopener" target="_blank">Cómo llegar →</a>
+      </figcaption>
+    </figure>
+  </div>
+
+  <div class="credito contenedor datos">
+    <p>
+      <a class="subrayado" href={site.credit.href} rel="noopener" target="_blank">{site.credit.label} · {site.credit.display}</a>
+    </p>
+    <p>{site.demoNotice}</p>
+  </div>
+
+  <p class="gigante" aria-hidden="true">{site.rotulo}</p>
+</footer>
+
+<style>
+  .pie {
+    position: relative;
+    overflow: hidden;
+    padding-top: clamp(3rem, 6vw, 5rem);
+    margin-top: -1.4rem;
+  }
+
+  .rejilla {
+    display: grid;
+    gap: 2.5rem;
+  }
+
+  .etiqueta {
+    color: var(--mostaza);
+    margin-bottom: 0.9rem;
+    font-family: var(--font-datos);
+    font-size: var(--text-mono-xs);
+  }
+
+  table {
+    width: 100%;
+    max-width: 26rem;
+    border-collapse: collapse;
+    font-size: var(--text-mono-s);
+  }
+
+  th,
+  td {
+    padding: 0.3rem 0;
+    border-bottom: 1.5px dashed rgb(237 232 218 / 0.35);
+    text-align: left;
+    vertical-align: top;
+  }
+
+  th {
+    font-weight: 400;
+    width: 7.5rem;
+    color: rgb(237 232 218 / 0.8);
+  }
+
+  .pago,
+  .ref {
+    margin-top: 0.8rem;
+    font-size: 0.92rem;
+    color: rgb(237 232 218 / 0.82);
+    max-width: 30rem;
+  }
+
+  address {
+    font-style: normal;
+  }
+
+  .lineas {
+    display: grid;
+    justify-items: start;
+    gap: 0.2rem;
+    margin-top: 1rem;
+    font-size: var(--text-mono-s);
+  }
+
+  .lineas a,
+  .enlaces a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+
+  .enlaces {
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 1.2rem;
+    font-size: var(--text-mono-s);
+  }
+
+  .subrayado {
+    text-decoration-color: var(--mostaza);
+  }
+
+  .subrayado:hover {
+    text-decoration-color: var(--gis);
+  }
+
+  .mapa {
+    position: relative;
+    margin: 0;
+    padding: 0.6rem 0.6rem 0.4rem;
+    background: var(--papel);
+    color: var(--grasa);
+    rotate: 1.5deg;
+    box-shadow: 6px 6px 0 rgb(0 0 0 / 0.45);
+    justify-self: start;
+    width: min(100%, 26rem);
+  }
+
+  .mapa iframe {
+    display: block;
+    width: 100%;
+    height: 15rem;
+    border: var(--borde);
+    filter: grayscale(1) sepia(0.35) contrast(1.05);
+  }
+
+  .mapa figcaption {
+    font-size: var(--text-mono-s);
+    padding-top: 0.2rem;
+  }
+
+  .mapa .subrayado {
+    text-decoration-color: var(--oxido);
+  }
+
+  .credito {
+    display: grid;
+    gap: 0.35rem;
+    margin-top: 3rem;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    border-top: 2px solid rgb(237 232 218 / 0.25);
+    font-size: var(--text-mono-xs);
+    color: rgb(237 232 218 / 0.85);
+  }
+
+  .gigante {
+    margin: 0;
+    font-family: var(--font-rotulo);
+    font-weight: 900;
+    font-size: clamp(6rem, 35vw, 40rem);
+    line-height: 0.76;
+    letter-spacing: -0.02em;
+    color: var(--oxido);
+    white-space: nowrap;
+    margin-left: -0.04em;
+    margin-top: 0.12em;
+    margin-bottom: -0.07em;
+    user-select: none;
+  }
+
+  @media (min-width: 64rem) {
+    .rejilla {
+      grid-template-columns: 1.1fr 1.2fr minmax(18rem, 0.9fr);
+      align-items: start;
+    }
+
+    .mapa {
+      margin-top: -0.5rem;
+      rotate: 2.5deg;
+    }
+  }
+
+</style>

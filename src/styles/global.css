@@ -1,0 +1,803 @@
+@import 'tailwindcss';
+
+/*
+  Tema propio. `--*: initial` borra TODOS los valores por defecto de Tailwind
+  (paleta, radios, sombras difusas, fuentes, tamaños) para que nada delate la plantilla.
+  Solo existe lo que está definido aquí (ver DISENO.md §2).
+*/
+@theme {
+  --*: initial;
+
+  --color-grasa: #14120f;
+  --color-kraft: #e6dac1;
+  --color-papel: #f5efe0;
+  --color-oxido: #c8401f;
+  --color-oxido-oscuro: #a3301a;
+  --color-mostaza: #e8b422;
+  --color-acero: #59646b;
+  --color-acero-oscuro: #4b555b;
+  --color-verde-ok: #3f7a4a;
+  --color-gis: #ede8da;
+  --color-pluma: #1f3a7a;
+  --color-transparent: transparent;
+  --color-current: currentColor;
+
+  --font-rotulo: var(--fuente-rotulo), Impact, 'Arial Narrow', sans-serif;
+  --font-cuerpo: var(--fuente-cuerpo), 'Segoe UI', Arial, sans-serif;
+  --font-datos: var(--fuente-datos), Consolas, 'Courier New', monospace;
+  --font-plumon: var(--fuente-plumon), 'Comic Sans MS', cursive;
+
+  --text-mono-xs: 0.75rem;
+  --text-mono-xs--line-height: 1.35;
+  --text-mono-s: 0.84rem;
+  --text-mono-s--line-height: 1.45;
+  --text-body: 1rem;
+  --text-body--line-height: 1.6;
+  --text-lead: clamp(1.1rem, 1rem + 0.4vw, 1.3rem);
+  --text-lead--line-height: 1.45;
+  --text-rotulo-s: clamp(1.7rem, 1.3rem + 1.6vw, 2.6rem);
+  --text-rotulo-s--line-height: 0.9;
+  --text-rotulo-m: clamp(2.4rem, 1.4rem + 4.6vw, 4.6rem);
+  --text-rotulo-m--line-height: 0.86;
+  --text-rotulo-l: clamp(3.4rem, 1rem + 10vw, 10rem);
+  --text-rotulo-l--line-height: 0.82;
+  --text-rotulo-xl: clamp(4.4rem, 0.6rem + 17vw, 19rem);
+  --text-rotulo-xl--line-height: 0.8;
+
+  --spacing: 0.25rem;
+
+  --radius-0: 0;
+  --radius-input: 2px;
+  --radius-ticket: 4px;
+  --radius-full: 9999px;
+
+  --shadow-1: 2px 2px 0 var(--color-grasa);
+  --shadow-2: 4px 4px 0 var(--color-grasa);
+  --shadow-3: 7px 7px 0 var(--color-grasa);
+
+  --breakpoint-sm: 40rem;
+  --breakpoint-md: 48rem;
+  --breakpoint-lg: 64rem;
+  --breakpoint-xl: 80rem;
+  --breakpoint-2xl: 96rem;
+
+  --container-hoja: 34rem;
+  --container-texto: 40rem;
+  --container-taller: 92rem;
+
+  --ease-rebote: cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+
+:root {
+  /* Alias cortos para CSS de componentes */
+  --grasa: var(--color-grasa);
+  --kraft: var(--color-kraft);
+  --papel: var(--color-papel);
+  --oxido: var(--color-oxido);
+  --oxido-oscuro: var(--color-oxido-oscuro);
+  --mostaza: var(--color-mostaza);
+  --acero: var(--color-acero);
+  --acero-oscuro: var(--color-acero-oscuro);
+  --verde-ok: var(--color-verde-ok);
+  --gis: var(--color-gis);
+  --pluma: var(--color-pluma);
+  --borde: 2px solid var(--grasa);
+  --gutter: clamp(1rem, 0.5rem + 2.4vw, 3rem);
+
+  /* Grano de papel: ruido fractal en tinta, multiplicado sobre el fondo */
+  --grano: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .08 0 0 0 0 .07 0 0 0 0 .05 0 0 0 .5 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E");
+  /* Fibras: ruido alargado de baja frecuencia (papel kraft) */
+  --fibra: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.012 .2' numOctaves='2' seed='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .35 0 0 0 0 .25 0 0 0 0 .12 0 0 0 .35 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)'/%3E%3C/svg%3E");
+  /* Tinta de sello: huecos donde la goma no tocó el papel */
+  --tinta-gastada: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='t'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.09' numOctaves='3' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -2 1.85'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23t)'/%3E%3C/svg%3E");
+
+  color-scheme: light;
+  accent-color: var(--oxido-oscuro);
+}
+
+@layer base {
+  html {
+    /* El fondo del lienzo es grasa: debajo del pie (margen para la barra móvil) sigue el pizarrón */
+    background: var(--grasa);
+    color: var(--grasa);
+    font-family: var(--font-cuerpo);
+    font-size: 100%;
+    -webkit-text-size-adjust: 100%;
+    overflow-x: clip;
+    text-rendering: optimizeLegibility;
+    scroll-padding-top: 1rem;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+
+  body {
+    min-height: 100dvh;
+    margin: 0;
+    overflow-x: clip;
+    background-color: var(--kraft);
+    background-image: var(--grano), var(--fibra);
+    font-size: var(--text-body);
+    line-height: 1.6;
+  }
+
+  @media (max-width: 63.99rem) {
+    body {
+      margin-bottom: 4.4rem;
+    }
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-rotulo);
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: -0.005em;
+    line-height: 0.86;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  a {
+    color: inherit;
+  }
+
+  ::selection {
+    background: var(--mostaza);
+    color: var(--grasa);
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--oxido-oscuro);
+    outline-offset: 3px;
+  }
+
+  .tablero :focus-visible,
+  .pizarron :focus-visible {
+    outline-color: var(--mostaza);
+  }
+
+  img,
+  svg {
+    display: block;
+    max-width: 100%;
+  }
+
+  input,
+  select,
+  textarea,
+  button {
+    font: inherit;
+    color: inherit;
+  }
+
+  [hidden] {
+    display: none !important;
+  }
+}
+
+@layer components {
+  /* ─── Tipos ─────────────────────────────────────── */
+  .datos {
+    font-family: var(--font-datos);
+    font-variant-numeric: tabular-nums slashed-zero;
+  }
+
+  .etiqueta {
+    font-family: var(--font-datos);
+    font-size: var(--text-mono-xs);
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .plumon {
+    font-family: var(--font-plumon);
+    color: var(--oxido-oscuro);
+    font-size: 1.45rem;
+    line-height: 1.05;
+    rotate: var(--r, -3deg);
+  }
+
+  .rotulo {
+    font-family: var(--font-rotulo);
+    font-weight: 900;
+    text-transform: uppercase;
+  }
+
+  /* ─── Enlace con subrayado grueso ───────────────── */
+  .subrayado {
+    text-decoration: underline;
+    text-decoration-thickness: 3px;
+    text-underline-offset: 0.28em;
+    text-decoration-color: var(--oxido);
+    transition: text-decoration-color 0.15s, text-underline-offset 0.15s;
+  }
+
+  .subrayado:hover {
+    text-decoration-color: var(--grasa);
+    text-underline-offset: 0.18em;
+  }
+
+  /* ─── Botón táctil: se hunde al presionarlo ───── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6em;
+    min-height: 3.25rem;
+    padding: 0.7rem 1.4rem;
+    border: var(--borde);
+    background: var(--mostaza);
+    color: var(--grasa);
+    box-shadow: var(--shadow-2);
+    font-family: var(--font-datos);
+    font-weight: 700;
+    font-size: 0.95rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+      translate 0.07s ease-out,
+      box-shadow 0.07s ease-out,
+      background-color 0.15s;
+  }
+
+  .btn:hover {
+    background: #f0c43c;
+  }
+
+  .btn:active {
+    translate: 3px 3px;
+    box-shadow: 1px 1px 0 var(--grasa);
+  }
+
+  .btn--tinta {
+    background: var(--grasa);
+    color: var(--papel);
+    box-shadow: 4px 4px 0 var(--oxido);
+  }
+
+  .btn--tinta:hover {
+    background: #2a2620;
+  }
+
+  .btn--tinta:active {
+    box-shadow: 1px 1px 0 var(--oxido);
+  }
+
+  .btn--papel {
+    background: var(--papel);
+  }
+
+  .btn--papel:hover {
+    background: #fff9ea;
+  }
+
+  .btn--oxido {
+    background: var(--oxido-oscuro);
+    color: var(--papel);
+  }
+
+  .btn--oxido:hover {
+    background: #8f2814;
+  }
+
+  .btn[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+    translate: none;
+  }
+
+  /* ─── Hoja de papel ─────────────────────────────── */
+  .hoja {
+    position: relative;
+    background-color: var(--papel);
+    background-image: var(--grano);
+    border: var(--borde);
+    box-shadow: var(--shadow-2);
+  }
+
+  /* Esquina doblada (abajo a la derecha) */
+  .doblez {
+    --d: 2.2rem;
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - var(--d)), calc(100% - var(--d)) 100%, 0 100%);
+  }
+
+  .doblez::after {
+    content: '';
+    position: absolute;
+    right: -2px;
+    bottom: -2px;
+    width: var(--d);
+    height: var(--d);
+    background: linear-gradient(315deg, transparent 50%, #d9cdb2 50%);
+    border-top: var(--borde);
+    border-left: var(--borde);
+    pointer-events: none;
+  }
+
+  /* Borde inferior rasgado */
+  .rasgado {
+    clip-path: polygon(
+      0 0,
+      100% 0,
+      100% 97%,
+      96% 99.4%,
+      91% 97.6%,
+      85% 99.8%,
+      79% 97.2%,
+      72% 99%,
+      66% 97.4%,
+      58% 99.6%,
+      51% 97%,
+      44% 99.2%,
+      37% 97.8%,
+      29% 100%,
+      22% 97.3%,
+      15% 99.5%,
+      8% 97.6%,
+      3% 99.3%,
+      0 97.5%
+    );
+  }
+
+  /* Cinta adhesiva semitransparente con extremos dentados */
+  .cinta {
+    position: absolute;
+    z-index: 3;
+    width: var(--w, 6.5rem);
+    height: 1.75rem;
+    background: rgb(232 222 196 / 0.72);
+    background-image: var(--grano);
+    rotate: var(--r, -6deg);
+    box-shadow: 0 0 0 1px rgb(20 18 15 / 0.08);
+    clip-path: polygon(
+      0 8%,
+      4% 0,
+      8% 12%,
+      12% 2%,
+      88% 0,
+      92% 10%,
+      96% 1%,
+      100% 9%,
+      100% 92%,
+      96% 100%,
+      92% 88%,
+      88% 99%,
+      12% 100%,
+      8% 89%,
+      4% 99%,
+      0 91%
+    );
+    pointer-events: none;
+  }
+
+  .cinta--mostaza {
+    background-color: rgb(232 180 34 / 0.62);
+  }
+
+  /* Grapa */
+  .grapa {
+    position: absolute;
+    z-index: 3;
+    width: 2.4rem;
+    height: 0.55rem;
+    border: 2.5px solid var(--acero);
+    border-bottom: 0;
+    rotate: var(--r, -4deg);
+    pointer-events: none;
+  }
+
+  /* Tachuela */
+  .tachuela {
+    position: absolute;
+    z-index: 3;
+    width: 1rem;
+    height: 1rem;
+    border-radius: var(--radius-full);
+    background: var(--c, var(--oxido));
+    border: 2px solid var(--grasa);
+    box-shadow: 2px 3px 0 rgb(20 18 15 / 0.45);
+    pointer-events: none;
+  }
+
+  /* ─── Sello de goma ─────────────────────────────── */
+  .sello {
+    --c: var(--oxido);
+    display: inline-grid;
+    place-items: center;
+    padding: 0.5rem 0.9rem;
+    border: 3px solid var(--c);
+    color: var(--c);
+    font-family: var(--font-rotulo);
+    font-weight: 900;
+    text-transform: uppercase;
+    line-height: 0.9;
+    text-align: center;
+    rotate: var(--r, -4deg);
+    mask-image: var(--tinta-gastada);
+    mask-size: 220px;
+    -webkit-mask-image: var(--tinta-gastada);
+    -webkit-mask-size: 220px;
+  }
+
+  .sello--doble {
+    outline: 2px solid var(--c);
+    outline-offset: 3px;
+  }
+
+  .sello--tinta {
+    --c: var(--grasa);
+  }
+
+  .sello--oscuro {
+    --c: var(--oxido-oscuro);
+  }
+
+  /* Se estampa al entrar en vista (scripts/estampa.ts añade .estampado) */
+  @media (prefers-reduced-motion: no-preference) {
+    .js [data-estampa] {
+      opacity: 0;
+    }
+
+    .js [data-estampa].estampado {
+      animation: estampar 0.42s var(--ease-rebote) both;
+      animation-delay: var(--delay, 0s);
+    }
+  }
+
+  /* ─── Fila de lista de precios con puntos guía ─── */
+  .fila-precio {
+    display: flex;
+    align-items: baseline;
+    gap: 0.4rem;
+  }
+
+  .fila-precio .guia {
+    flex: 1 1 1.5rem;
+    min-width: 1.5rem;
+    border-bottom: 3px dotted currentColor;
+    opacity: 0.55;
+    translate: 0 -0.3em;
+  }
+
+  .fila-precio .monto {
+    font-family: var(--font-datos);
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  /* ─── Línea de llenado y campos de la orden ────── */
+  .campo {
+    display: grid;
+    gap: 0.15rem;
+  }
+
+  .campo > label,
+  .campo > .campo-label {
+    font-family: var(--font-datos);
+    font-size: var(--text-mono-xs);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--acero);
+  }
+
+  .campo input:not([type='radio'], [type='checkbox']),
+  .campo select,
+  .campo textarea {
+    width: 100%;
+    min-height: 2.9rem;
+    padding: 0.35rem 0.15rem 0.25rem;
+    border: 0;
+    border-bottom: 2px dashed var(--grasa);
+    border-radius: 0;
+    background: transparent;
+    font-family: var(--font-datos);
+    font-size: 1.05rem;
+    color: var(--pluma);
+  }
+
+  .campo textarea {
+    min-height: 5.5rem;
+    resize: vertical;
+    background-image: repeating-linear-gradient(transparent 0 calc(1.9rem - 1px), rgb(20 18 15 / 0.35) calc(1.9rem - 1px) 1.9rem);
+    border-bottom-style: solid;
+    line-height: 1.9rem;
+    padding-top: 0;
+  }
+
+  .campo select {
+    appearance: none;
+    background-image: linear-gradient(45deg, transparent 50%, var(--grasa) 50%), linear-gradient(135deg, var(--grasa) 50%, transparent 50%);
+    background-position:
+      calc(100% - 14px) 55%,
+      calc(100% - 8px) 55%;
+    background-size: 6px 6px;
+    background-repeat: no-repeat;
+    padding-right: 1.6rem;
+  }
+
+  .campo input:not([type='radio'], [type='checkbox']):focus-visible,
+  .campo select:focus-visible,
+  .campo textarea:focus-visible {
+    outline: 3px solid var(--mostaza);
+    outline-offset: 2px;
+    border-bottom-color: var(--oxido-oscuro);
+  }
+
+  .campo[data-error] input,
+  .campo[data-error] select,
+  .campo[data-error] textarea {
+    border-bottom-color: var(--oxido-oscuro);
+    border-bottom-style: solid;
+    background-color: rgb(200 64 31 / 0.08);
+  }
+
+  .campo .error {
+    font-family: var(--font-datos);
+    font-size: var(--text-mono-xs);
+    color: var(--oxido-oscuro);
+    font-weight: 700;
+  }
+
+  .campo input::placeholder,
+  .campo textarea::placeholder {
+    color: rgb(89 100 107 / 0.75);
+  }
+
+  /* ─── Casilla ☐/☒ de la orden ───────────────────── */
+  .casilla {
+    display: inline-grid;
+    place-items: center;
+    flex: none;
+    width: 1.35rem;
+    height: 1.35rem;
+    border: var(--borde);
+    background: var(--papel);
+    font-family: var(--font-datos);
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .casilla-input {
+    appearance: none;
+    margin: 0;
+    width: 1.5rem;
+    height: 1.5rem;
+    flex: none;
+    border: var(--borde);
+    background: var(--papel);
+    display: inline-grid;
+    place-items: center;
+    cursor: pointer;
+  }
+
+  .casilla-input::before {
+    content: '';
+    width: 1.05rem;
+    height: 1.05rem;
+    background: var(--oxido-oscuro);
+    clip-path: polygon(14% 4%, 50% 40%, 86% 4%, 96% 14%, 60% 50%, 96% 86%, 86% 96%, 50% 60%, 14% 96%, 4% 86%, 40% 50%, 4% 14%);
+    scale: 0;
+    transition: scale 0.1s;
+  }
+
+  .casilla-input:checked::before {
+    scale: 1;
+  }
+
+  .casilla-input[type='radio'] {
+    border-radius: var(--radius-full);
+  }
+
+  .casilla-input[type='radio']::before {
+    clip-path: circle(42%);
+    background: var(--grasa);
+  }
+
+  /* ─── Cinta de precaución (solo 2 en el sitio) ─── */
+  .precaucion {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    min-height: 3.4rem;
+    border-block: var(--borde);
+    background: repeating-linear-gradient(-45deg, var(--mostaza) 0 1.4rem, var(--grasa) 1.4rem 2.8rem);
+    rotate: var(--r, -1.2deg);
+    width: 104vw;
+    margin-inline: -2vw;
+    box-shadow: 0 4px 0 rgb(20 18 15 / 0.25);
+  }
+
+  .precaucion > span {
+    margin-left: clamp(1rem, 12vw, 14rem);
+    padding: 0.35rem 0.9rem;
+    background: var(--grasa);
+    color: var(--mostaza);
+    font-family: var(--font-datos);
+    font-weight: 700;
+    font-size: 0.82rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  /* ─── Fotografía en duotono (tinta + kraft) con trama ─── */
+  .foto-duo {
+    position: relative;
+    overflow: hidden;
+    background: var(--kraft);
+    isolation: isolate;
+  }
+
+  .foto-duo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: grayscale(1) contrast(1.35) brightness(1.08);
+    mix-blend-mode: multiply;
+  }
+
+  .foto-duo::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(rgb(20 18 15 / 0.55) 0.9px, transparent 1.3px);
+    background-size: 4px 4px;
+    mix-blend-mode: multiply;
+    opacity: 0.55;
+    pointer-events: none;
+  }
+
+  .foto-duo.sin-foto .respaldo {
+    display: grid;
+  }
+
+  .foto-duo--oxido {
+    background: #e7b9a4;
+  }
+
+  /* Si la foto no carga, queda el papel con la leyenda de respaldo */
+  .foto-duo .respaldo {
+    position: absolute;
+    inset: 0;
+    display: none;
+    place-items: center;
+    padding: 1rem;
+    text-align: center;
+    font-family: var(--font-datos);
+    font-size: var(--text-mono-xs);
+    color: var(--acero-oscuro);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  /* ─── Texturas de tablero ───────────────────────── */
+  .pegboard {
+    background-color: #cdbd9c;
+    background-image:
+      radial-gradient(circle at center, rgb(20 18 15 / 0.62) 0 3.2px, rgb(255 250 235 / 0.35) 3.6px 4.6px, transparent 5px),
+      var(--fibra);
+    background-size:
+      30px 30px,
+      300px 300px;
+  }
+
+  .pizarron {
+    background-color: var(--grasa);
+    background-image: var(--grano);
+    color: var(--gis);
+  }
+
+  .gis {
+    font-family: var(--font-plumon);
+    color: var(--gis);
+    filter: url(#trazo-gis);
+  }
+
+  /* Perforación vertical (talón desprendible) */
+  .perforado-v {
+    background-image: radial-gradient(circle, var(--kraft) 0 4px, transparent 4.5px);
+    background-size: 14px 14px;
+    background-repeat: repeat-y;
+    width: 14px;
+  }
+
+  .perforado-h {
+    background-image: radial-gradient(circle, var(--kraft) 0 4px, transparent 4.5px);
+    background-size: 14px 14px;
+    background-repeat: repeat-x;
+    height: 14px;
+  }
+
+  /* Ilustración con trazo a mano */
+  .ilus {
+    color: var(--grasa);
+    overflow: visible;
+  }
+
+  .ilus .trazo {
+    filter: url(#trazo-mano);
+  }
+
+  /* Salto de contenido */
+  .skip {
+    position: absolute;
+    left: 1rem;
+    top: -10rem;
+    z-index: 100;
+  }
+
+  .skip:focus {
+    top: 1rem;
+  }
+
+  .contenedor {
+    width: 100%;
+    max-width: var(--container-taller);
+    margin-inline: auto;
+    padding-inline: var(--gutter);
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+}
+
+@keyframes estampar {
+  0% {
+    opacity: 0;
+    scale: 1.45;
+    rotate: calc(var(--r, -4deg) - 9deg);
+    filter: drop-shadow(6px 8px 0 rgb(20 18 15 / 0.35));
+  }
+  60% {
+    opacity: 1;
+    scale: 0.95;
+    rotate: var(--r, -4deg);
+    filter: drop-shadow(1px 1px 0 rgb(20 18 15 / 0.2));
+  }
+  100% {
+    opacity: 1;
+    scale: 1;
+    rotate: var(--r, -4deg);
+    filter: drop-shadow(0 0 0 transparent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@media print {
+  body {
+    background: #fff !important;
+  }
+}

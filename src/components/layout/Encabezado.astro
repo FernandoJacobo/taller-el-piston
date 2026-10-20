@@ -1,0 +1,274 @@
+---
+/**
+ * Encabezado impreso de la orden de servicio: folio · fecha · horario · estado.
+ * El estado "abierto/cerrado" y la fecha se recalculan en el navegador (el HTML es estático).
+ */
+import { site, formatTime } from '@/config/site';
+import { openStatus } from '@/lib/horario';
+import Logo from '@/components/ui/Logo.astro';
+
+interface Props {
+  folio: string;
+  path: string;
+}
+const { folio, path } = Astro.props;
+
+const ahora = openStatus(site.hours, site.timeZone);
+const semana = site.hours.lun[0];
+const sabado = site.hours.sab[0];
+const activo = (href: string) => {
+  const p = href.split('#')[0] || '/';
+  return p !== '/' && path.startsWith(p);
+};
+---
+
+<header class="encabezado">
+  <div class="tira contenedor">
+    <dl class="celdas datos">
+      <div class="celda folio">
+        <dt>Folio</dt>
+        <dd>N.º <span>{folio}</span></dd>
+      </div>
+      <div class="celda fecha">
+        <dt>Fecha</dt>
+        <dd data-fecha>—</dd>
+      </div>
+      <div class="celda horario">
+        <dt>Horario</dt>
+        <dd>
+          L–V {formatTime(semana.open)}–{formatTime(semana.close)} · Sáb {formatTime(sabado.open)}–{formatTime(sabado.close)}
+          <br /><a class="subrayado" href={`tel:${site.contact.phone}`}>Tel. {site.contact.phoneDisplay}</a>
+        </dd>
+      </div>
+      <div class="celda estado" data-abierto={ahora.open ? 'si' : 'no'}>
+        <dt>Estado</dt>
+        <dd>
+          <span class="casilla" aria-hidden="true">{ahora.open ? '✕' : ''}</span>
+          <span>
+            <strong data-estado>{ahora.estado}</strong>
+            <span class="detalle" data-detalle>{ahora.detalle}</span>
+          </span>
+        </dd>
+      </div>
+    </dl>
+  </div>
+
+  <div class="barra contenedor">
+    <a href="/" class="marca" aria-label={`${site.name}, inicio`}>
+      <Logo chico />
+    </a>
+    <nav aria-label="Principal">
+      <ul>
+        {
+          site.nav.map((item) => (
+            <li>
+              <a href={item.href} aria-current={activo(item.href) ? 'page' : undefined}>
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<script>
+  import { site } from '@/config/site';
+  import { openStatus } from '@/lib/horario';
+
+  const meses = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
+
+  function pintar() {
+    const s = openStatus(site.hours, site.timeZone);
+    const celda = document.querySelector<HTMLElement>('.encabezado .estado');
+    if (!celda) return;
+    celda.dataset.abierto = s.open ? 'si' : 'no';
+    celda.querySelector('.casilla')!.textContent = s.open ? '✕' : '';
+    celda.querySelector('[data-estado]')!.textContent = s.estado;
+    celda.querySelector('[data-detalle]')!.textContent = s.detalle;
+    const d = new Date();
+    const fecha = document.querySelector('[data-fecha]');
+    if (fecha) fecha.textContent = `${String(d.getDate()).padStart(2, '0')}·${meses[d.getMonth()]}·${String(d.getFullYear()).slice(2)}`;
+  }
+
+  pintar();
+  setInterval(pintar, 60_000);
+</script>
+
+<style>
+  .encabezado {
+    position: relative;
+    z-index: 20;
+  }
+
+  .tira {
+    padding-top: 0.75rem;
+  }
+
+  .celdas {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    margin: 0;
+    border: var(--borde);
+    background: var(--papel);
+    background-image: var(--grano);
+    font-size: var(--text-mono-xs);
+    line-height: 1.35;
+  }
+
+  .celda {
+    padding: 0.35rem 0.65rem 0.45rem;
+    border-right: var(--borde);
+    min-width: 0;
+  }
+
+  .celda:last-child {
+    border-right: 0;
+  }
+
+  dt {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--acero);
+  }
+
+  dd {
+    margin: 0;
+  }
+
+  .folio dd {
+    font-weight: 700;
+    color: var(--oxido-oscuro);
+    font-size: 0.95rem;
+    white-space: nowrap;
+  }
+
+  .folio dd span {
+    font-size: 1.05rem;
+  }
+
+  .fecha,
+  .horario {
+    display: none;
+  }
+
+  .fecha dd {
+    font-weight: 700;
+    letter-spacing: 0.08em;
+  }
+
+  .estado dd {
+    display: flex;
+    gap: 0.5rem;
+    align-items: flex-start;
+  }
+
+  .estado .casilla {
+    width: 1.1rem;
+    height: 1.1rem;
+    font-size: 0.8rem;
+    color: var(--oxido-oscuro);
+    margin-top: 0.1rem;
+  }
+
+  .estado strong {
+    display: block;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .estado[data-abierto='no'] strong {
+    color: var(--oxido-oscuro);
+  }
+
+  .detalle {
+    display: block;
+    color: var(--acero);
+  }
+
+  .barra {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem 2rem;
+    padding-top: 1.1rem;
+    padding-bottom: 0.4rem;
+  }
+
+  .marca {
+    text-decoration: none;
+    margin-left: 0.6rem;
+  }
+
+  nav ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 1.15rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  nav a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    font-family: var(--font-datos);
+    font-size: 0.86rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    text-decoration: underline;
+    text-decoration-thickness: 3px;
+    text-underline-offset: 0.4em;
+    text-decoration-color: transparent;
+    transition: text-decoration-color 0.15s;
+  }
+
+  nav a:hover {
+    text-decoration-color: var(--grasa);
+  }
+
+  nav a[aria-current='page'] {
+    text-decoration-color: var(--oxido);
+    text-decoration-thickness: 5px;
+  }
+
+  @media (min-width: 48rem) {
+    .celdas {
+      grid-template-columns: auto auto 1fr auto;
+    }
+
+    .fecha,
+    .horario {
+      display: block;
+    }
+
+    .horario br {
+      display: none;
+    }
+
+    .horario a {
+      margin-left: 0.75rem;
+    }
+  }
+
+  @media (max-width: 47.99rem) {
+    nav {
+      width: 100%;
+      border-top: 2px dashed rgb(20 18 15 / 0.4);
+    }
+
+    nav ul {
+      gap: 0 0.9rem;
+    }
+
+    nav a {
+      font-size: 0.8rem;
+    }
+  }
+</style>
