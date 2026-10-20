@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.astro/
+.env
+qa/capturas/
+test-results/
+playwright-report/
+*.log
