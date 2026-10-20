@@ -15,7 +15,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "qa": "node scripts/qa-capturas.mjs",
-    "og": "node scripts/og.mjs"
+    "og": "node scripts/og.mjs",
+    "e2e": "playwright test"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.4",

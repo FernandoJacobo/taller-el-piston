@@ -1,0 +1,689 @@
+---
+/**
+ * Cotizador "nota de taller". Toda la cuenta sale de src/lib/cotizador.ts (probado con Vitest);
+ * este archivo solo dibuja el formulario y el ticket. ?s=<id> preselecciona un servicio.
+ */
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { servicios, sistemas } from '@/data/servicios';
+import { refacciones, vehiculos, precioDesde } from '@/lib/cotizador';
+import { site, formatMXN, fullAddress } from '@/config/site';
+import { businessSchema } from '@/lib/schema';
+---
+
+<BaseLayout
+  title="Cotizador en línea"
+  description="Cotiza en línea frenos, afinación, clutch, suspensión y más para tu compacto, sedán, SUV o pickup. Refacciones y mano de obra por separado, con o sin IVA. Estimado sujeto a revisión."
+  folio="0003"
+  jsonLd={(og) => [businessSchema(og)]}
+>
+  <section class="cabeza contenedor no-imprimir" aria-labelledby="titulo">
+    <p class="etiqueta">Hoja 3 · Presupuesto</p>
+    <h1 id="titulo" class="titulo"><span class="abre">¿</span>Cuánto me va a salir?</h1>
+    <p class="lead">Elige tu tipo de auto, lo que necesitas y qué refacción quieres. Te sale la nota como te la daríamos en el mostrador: refacciones y mano de obra por separado.</p>
+  </section>
+
+  <div class="contenedor mesa">
+    <form class="nota no-imprimir" data-cotizador>
+      <fieldset class="paso">
+        <legend><span class="datos n">1</span> Tu auto</legend>
+        <div class="opciones-grandes">
+          {
+            Object.entries(vehiculos).map(([id, v], i) => (
+              <label class="op">
+                <input type="radio" class="casilla-input" name="vehiculo" value={id} checked={i === 1} />
+                <span>
+                  <span class="rotulo op-nombre">{v.nombre}</span>
+                  <span class="datos op-ej">{v.ejemplo}</span>
+                </span>
+              </label>
+            ))
+          }
+        </div>
+      </fieldset>
+
+      <fieldset class="paso">
+        <legend><span class="datos n">2</span> Lo que necesita</legend>
+        <p class="ayuda datos">Marca uno o varios. Precio desde, sin IVA.</p>
+        <div class="servicios">
+          {
+            sistemas.map((g) => (
+              <div class="grupo">
+                <p class="etiqueta g-nombre">{g.nombre}</p>
+                <ul>
+                  {servicios
+                    .filter((s) => s.sistema === g.id)
+                    .map((s) => (
+                      <li>
+                        <label class="sv fila-precio">
+                          <input type="checkbox" class="casilla-input" name="servicio" value={s.id} />
+                          <span class="sv-nombre">{s.nombre}</span>
+                          <span class="guia" aria-hidden="true" />
+                          <span class="monto">{formatMXN(precioDesde(s))}</span>
+                        </label>
+                      </li>
+                    ))}
+                </ul>
+              </div>
+            ))
+          }
+        </div>
+      </fieldset>
+
+      <fieldset class="paso">
+        <legend><span class="datos n">3</span> Tipo de refacción</legend>
+        <div class="refacciones">
+          {
+            Object.entries(refacciones).map(([id, r]) => (
+              <label class="ref">
+                <input type="radio" class="casilla-input" name="refaccion" value={id} checked={id === 'equivalente'} />
+                <span>
+                  <strong>{r.nombre}</strong>
+                  <span class="ref-det">{r.detalle}</span>
+                </span>
+              </label>
+            ))
+          }
+        </div>
+        <label class="iva">
+          <input type="checkbox" class="casilla-input" name="iva" />
+          <span>Con factura (+16 % de IVA)</span>
+        </label>
+      </fieldset>
+    </form>
+
+    <aside class="caja" aria-labelledby="ticket-titulo">
+      <div class="ticket" data-ticket>
+        <div class="ticket-cab">
+          <p class="t-nombre rotulo">{site.name}</p>
+          <p>{fullAddress}</p>
+          <p>Tel. {site.contact.phoneDisplay}</p>
+        </div>
+        <h2 id="ticket-titulo" class="t-titulo">Nota de taller · estimado</h2>
+        <p class="t-meta"><span>N.º <b data-t-folio>—</b></span><span data-t-fecha></span></p>
+        <p class="t-meta" data-t-config>—</p>
+        <div class="t-raya" aria-hidden="true"></div>
+        <ol class="t-partidas" data-t-partidas>
+          <li class="t-vacio">Marca al menos un servicio.</li>
+        </ol>
+        <div class="t-raya" aria-hidden="true"></div>
+        <dl class="t-totales">
+          <div class="fila-precio"><dt>Refacciones</dt><span class="guia"></span><dd class="monto" data-t="refacciones">$0</dd></div>
+          <div class="fila-precio"><dt>Mano de obra</dt><span class="guia"></span><dd class="monto" data-t="manoObra">$0</dd></div>
+          <div class="fila-precio"><dt>Subtotal</dt><span class="guia"></span><dd class="monto" data-t="subtotal">$0</dd></div>
+          <div class="fila-precio" data-fila-iva hidden><dt>IVA 16 %</dt><span class="guia"></span><dd class="monto" data-t="iva">$0</dd></div>
+          <div class="fila-precio total"><dt>Total</dt><span class="guia"></span><dd class="monto" data-t="total">$0</dd></div>
+        </dl>
+        <dl class="t-tiempo">
+          <div><dt>Tiempo de bahía</dt><dd data-t="horas">—</dd></div>
+          <div><dt>Entrega</dt><dd data-t="entrega">—</dd></div>
+        </dl>
+        <p class="t-pie">Estimado sujeto a revisión del vehículo. No se cambia nada sin tu autorización. Garantía 3 meses o 5,000 km.</p>
+        <p class="sello sello--oscuro t-sello" style="--r:-9deg" data-t-sello hidden>Estimado</p>
+        <p class="plumon t-nota" style="--r:-5deg" aria-hidden="true">estimado, no es factura</p>
+      </div>
+
+      <div class="acciones no-imprimir">
+        <a class="btn" href={`https://wa.me/${site.contact.whatsapp}`} data-accion="wa" target="_blank" rel="noopener">Enviar por WhatsApp</a>
+        <button class="btn btn--papel" type="button" data-accion="imprimir">Imprimir</button>
+        <a class="btn btn--tinta" href="/contacto#orden" data-accion="agendar">Agendar con esta cotización</a>
+        <p class="aviso datos" role="status" data-aviso></p>
+      </div>
+    </aside>
+  </div>
+</BaseLayout>
+
+<script>
+  import { servicios } from '@/data/servicios';
+  import { cotizar, formatoEntrega, formatoHoras, refacciones, vehiculos, type Refaccion, type Vehiculo } from '@/lib/cotizador';
+  import { folioDelMomento } from '@/lib/orden';
+  import { formatMXN, whatsappUrl } from '@/config/site';
+
+  const form = document.querySelector<HTMLFormElement>('[data-cotizador]')!;
+  const ticket = document.querySelector<HTMLElement>('[data-ticket]')!;
+  const folio = folioDelMomento();
+  const ahora = new Date();
+  ticket.querySelector('[data-t-folio]')!.textContent = folio;
+  ticket.querySelector('[data-t-fecha]')!.textContent = ahora.toLocaleString('es-MX', { dateStyle: 'short', timeStyle: 'short' });
+
+  // ?s=balatas-delanteras viene de /servicios
+  const pre = new URLSearchParams(location.search).getAll('s');
+  for (const id of pre) {
+    const cb = form.querySelector<HTMLInputElement>(`input[name="servicio"][value="${CSS.escape(id)}"]`);
+    if (cb) cb.checked = true;
+  }
+
+  const estado = () => {
+    const f = new FormData(form);
+    const ids = f.getAll('servicio').map(String);
+    return {
+      vehiculo: String(f.get('vehiculo') ?? 'sedan') as Vehiculo,
+      refaccion: String(f.get('refaccion') ?? 'equivalente') as Refaccion,
+      iva: f.has('iva'),
+      lista: servicios.filter((s) => ids.includes(s.id)),
+    };
+  };
+
+  const linea = (etq: string, monto: number) =>
+    `<span class="fila-precio sub"><span>${etq}</span><span class="guia"></span><span class="monto">${formatMXN(monto)}</span></span>`;
+
+  function texto() {
+    const e = estado();
+    const c = cotizar(e.lista, e.vehiculo, e.refaccion, e.iva);
+    return [
+      `*NOTA DE TALLER (ESTIMADO) N.º ${folio}*`,
+      `Vehículo: ${vehiculos[e.vehiculo].nombre} · Refacción: ${refacciones[e.refaccion].nombre}`,
+      '',
+      ...c.partidas.map((p) => `• ${p.nombre}: ${formatMXN(p.refaccion + p.manoObra)} (ref. ${formatMXN(p.refaccion)} + M.O. ${formatMXN(p.manoObra)})`),
+      '',
+      `Refacciones: ${formatMXN(c.refacciones)}`,
+      `Mano de obra: ${formatMXN(c.manoObra)}`,
+      e.iva ? `IVA 16 %: ${formatMXN(c.iva)}` : 'Sin IVA',
+      `*Total estimado: ${formatMXN(c.total)}*`,
+      `Tiempo: ${formatoHoras(c.horas)} · Entrega: ${formatoEntrega(c)}`,
+      '',
+      'Quiero agendar una revisión para confirmar.',
+    ].join('\n');
+  }
+
+  function pintar() {
+    const e = estado();
+    const c = cotizar(e.lista, e.vehiculo, e.refaccion, e.iva);
+    ticket.querySelector('[data-t-config]')!.textContent = `${vehiculos[e.vehiculo].nombre.toUpperCase()} · REFACCIÓN ${refacciones[e.refaccion].nombre.toUpperCase()}`;
+    const ol = ticket.querySelector('[data-t-partidas]')!;
+    ol.innerHTML = c.partidas.length
+      ? c.partidas
+          .map(
+            (p) =>
+              `<li><span class="t-concepto">${p.nombre}</span>${p.refaccion ? linea('Refacción', p.refaccion) : ''}${linea('Mano de obra', p.manoObra)}</li>`,
+          )
+          .join('')
+      : '<li class="t-vacio">Marca al menos un servicio.</li>';
+    const set = (k: string, v: string) => (ticket.querySelector(`[data-t="${k}"]`)!.textContent = v);
+    set('refacciones', formatMXN(c.refacciones));
+    set('manoObra', formatMXN(c.manoObra));
+    set('subtotal', formatMXN(c.subtotal));
+    set('iva', formatMXN(c.iva));
+    set('total', formatMXN(c.total));
+    set('horas', c.horas ? formatoHoras(c.horas) : '—');
+    set('entrega', formatoEntrega(c));
+    ticket.querySelector<HTMLElement>('[data-fila-iva]')!.hidden = !e.iva;
+
+    // El sello se estampa la primera vez que hay algo que cotizar
+    const sello = ticket.querySelector<HTMLElement>('[data-t-sello]')!;
+    const habia = !sello.hidden;
+    sello.hidden = c.partidas.length === 0;
+    if (!habia && !sello.hidden) {
+      sello.removeAttribute('data-estampa');
+      sello.classList.remove('estampado');
+      void sello.offsetWidth;
+      sello.setAttribute('data-estampa', '');
+      sello.classList.add('estampado');
+    }
+
+    const vacio = c.partidas.length === 0;
+    document.querySelectorAll<HTMLElement>('[data-accion]').forEach((b) => b.toggleAttribute('aria-disabled', vacio));
+  }
+
+  form.addEventListener('change', pintar);
+  pintar();
+
+  const aviso = document.querySelector('[data-aviso]')!;
+  document.querySelector('.acciones')!.addEventListener('click', (ev) => {
+    const b = (ev.target as HTMLElement).closest<HTMLElement>('[data-accion]');
+    if (!b) return;
+    if (estado().lista.length === 0) {
+      ev.preventDefault();
+      aviso.textContent = 'Primero marca al menos un servicio.';
+      return;
+    }
+    aviso.textContent = '';
+    const accion = b.dataset.accion;
+    if (accion === 'wa') (b as HTMLAnchorElement).href = whatsappUrl(texto());
+    if (accion === 'imprimir') window.print();
+    if (accion === 'agendar') {
+      const e = estado();
+      const c = cotizar(e.lista, e.vehiculo, e.refaccion, e.iva);
+      const falla = `Cotización N.º ${folio}: ${e.lista.map((s) => s.nombre).join(', ')} (${vehiculos[e.vehiculo].nombre}, refacción ${refacciones[e.refaccion].nombre.toLowerCase()}). Total estimado ${formatMXN(c.total)}.`;
+      (b as HTMLAnchorElement).href = `/contacto?falla=${encodeURIComponent(falla)}#orden`;
+    }
+  });
+</script>
+
+<style>
+  .cabeza {
+    padding-block: clamp(1.5rem, 4vw, 3rem) 1rem;
+  }
+
+  .cabeza .etiqueta {
+    color: var(--oxido-oscuro);
+  }
+
+  .titulo {
+    font-size: var(--text-rotulo-l);
+    margin-top: 0.4rem;
+    max-width: 12ch;
+  }
+
+  .lead {
+    max-width: 36rem;
+    margin-top: 1rem;
+    font-size: var(--text-lead);
+  }
+
+  .mesa {
+    display: grid;
+    gap: 2.5rem;
+    padding-block: 2rem 5rem;
+  }
+
+  .paso {
+    border: 0;
+    border-top: var(--borde);
+    margin: 0 0 2.2rem;
+    padding: 0.8rem 0 0;
+    min-width: 0;
+  }
+
+  .paso legend {
+    float: left;
+    width: 100%;
+    font-family: var(--font-rotulo);
+    font-weight: 900;
+    text-transform: uppercase;
+    font-size: var(--text-rotulo-s);
+    margin-bottom: 0.9rem;
+    display: flex;
+    gap: 0.6rem;
+    align-items: baseline;
+  }
+
+  .paso legend + * {
+    clear: both;
+  }
+
+  .n {
+    display: inline-grid;
+    place-items: center;
+    width: 1.8rem;
+    height: 1.8rem;
+    background: var(--grasa);
+    color: var(--mostaza);
+    font-size: 0.9rem;
+  }
+
+  .ayuda {
+    font-size: var(--text-mono-xs);
+    color: var(--acero-oscuro);
+    margin-bottom: 0.6rem;
+  }
+
+  /* Vehículo: renglones tipográficos, no tarjetas */
+  .opciones-grandes {
+    display: grid;
+    border-top: 2px solid var(--grasa);
+  }
+
+  .op {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    min-height: 3.6rem;
+    padding: 0.4rem 0.3rem;
+    border-bottom: 2px solid var(--grasa);
+    cursor: pointer;
+  }
+
+  .op > span {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.2rem 0.9rem;
+  }
+
+  .op-nombre {
+    font-size: clamp(1.8rem, 1.3rem + 2vw, 2.8rem);
+    line-height: 0.9;
+  }
+
+  .op-ej {
+    font-size: var(--text-mono-xs);
+    color: var(--acero-oscuro);
+  }
+
+  .op:has(input:checked) {
+    background: var(--grasa);
+    color: var(--papel);
+  }
+
+  .op:has(input:checked) .op-ej {
+    color: var(--mostaza);
+  }
+
+  /* Servicios */
+  .servicios {
+    display: grid;
+    gap: 1.2rem;
+  }
+
+  .g-nombre {
+    color: var(--acero-oscuro);
+    padding-bottom: 0.2rem;
+    border-bottom: 2px dashed rgb(20 18 15 / 0.45);
+  }
+
+  .servicios ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .sv {
+    min-height: 44px;
+    padding: 0.2rem 0;
+    cursor: pointer;
+    align-items: center;
+  }
+
+  .sv .casilla-input {
+    width: 1.3rem;
+    height: 1.3rem;
+  }
+
+  .sv .casilla-input::before {
+    width: 0.9rem;
+    height: 0.9rem;
+  }
+
+  .sv-nombre {
+    font-size: 0.96rem;
+  }
+
+  .sv .guia {
+    translate: 0 0.15em;
+  }
+
+  .sv .monto {
+    font-size: 0.88rem;
+  }
+
+  .sv:has(input:checked) .sv-nombre {
+    font-weight: 600;
+    background: rgb(232 180 34 / 0.5);
+  }
+
+  .refacciones {
+    display: grid;
+    gap: 0.6rem;
+  }
+
+  .ref,
+  .iva {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+    min-height: 44px;
+    cursor: pointer;
+  }
+
+  .ref strong {
+    display: block;
+    font-weight: 600;
+  }
+
+  .ref-det {
+    font-size: 0.9rem;
+    color: var(--acero-oscuro);
+  }
+
+  .iva {
+    margin-top: 1.2rem;
+    align-items: center;
+    font-weight: 600;
+    padding: 0.6rem 0.7rem;
+    border: 2px dashed var(--grasa);
+  }
+
+  /* ─── Ticket impreso ─── */
+  .caja {
+    display: grid;
+    gap: 1.4rem;
+    align-content: start;
+  }
+
+  .ticket {
+    position: relative;
+    max-width: 25rem;
+    padding: 1.6rem 1.3rem 2.2rem;
+    background: #fbf8ef;
+    color: var(--grasa);
+    font-family: var(--font-datos);
+    font-size: 0.82rem;
+    line-height: 1.45;
+    filter: drop-shadow(5px 6px 0 rgb(20 18 15 / 0.55));
+    rotate: 0.8deg;
+    /* perforaciones de papel continuo arriba y abajo */
+    mask:
+      radial-gradient(circle 5px at 50% 0, transparent 98%, #000) top / 16px 51% repeat-x,
+      radial-gradient(circle 5px at 50% 100%, transparent 98%, #000) bottom / 16px 51% repeat-x;
+  }
+
+  .ticket-cab {
+    text-align: center;
+    font-size: 0.72rem;
+    padding-bottom: 0.6rem;
+  }
+
+  .t-nombre {
+    font-size: 1.5rem;
+    line-height: 1;
+    margin-bottom: 0.3rem;
+  }
+
+  .t-titulo {
+    font-family: var(--font-datos);
+    font-weight: 700;
+    font-size: 0.9rem;
+    letter-spacing: 0.1em;
+    text-align: center;
+    padding: 0.3rem;
+    border-block: 2px solid var(--grasa);
+    margin: 0.3rem 0 0.6rem;
+  }
+
+  .t-meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+  }
+
+  .t-raya {
+    border-top: 2px dashed var(--grasa);
+    margin: 0.7rem 0;
+  }
+
+  .t-partidas {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.6rem;
+  }
+
+  .t-partidas :global(.t-concepto) {
+    display: block;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.78rem;
+  }
+
+  .t-partidas :global(.sub) {
+    padding-left: 0.8rem;
+    font-size: 0.78rem;
+  }
+
+  .t-partidas :global(.sub .monto) {
+    font-weight: 400;
+  }
+
+  .t-vacio {
+    color: var(--acero);
+    text-align: center;
+    padding: 0.8rem 0;
+  }
+
+  .t-totales {
+    margin: 0;
+    display: grid;
+    gap: 0.15rem;
+  }
+
+  .t-totales dt {
+    text-transform: uppercase;
+  }
+
+  .t-totales dd {
+    margin: 0;
+  }
+
+  .total {
+    margin-top: 0.4rem;
+    padding-top: 0.4rem;
+    border-top: 3px double var(--grasa);
+    font-size: 1.15rem;
+    font-weight: 700;
+  }
+
+  .t-tiempo {
+    margin: 0.9rem 0 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    border: 2px solid var(--grasa);
+  }
+
+  .t-tiempo dt {
+    font-size: 0.62rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--acero);
+  }
+
+  .t-tiempo dd {
+    margin: 0;
+    font-weight: 700;
+  }
+
+  .t-pie {
+    margin-top: 0.9rem;
+    font-size: 0.68rem;
+    text-align: center;
+    color: var(--acero);
+  }
+
+  .t-sello {
+    position: absolute;
+    right: 0.4rem;
+    top: 8.6rem;
+    font-size: 1.9rem;
+    padding: 0.3rem 0.7rem;
+  }
+
+  .t-nota {
+    position: absolute;
+    left: -0.6rem;
+    bottom: -0.2rem;
+    font-size: 1.3rem;
+  }
+
+  .acciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.9rem;
+    max-width: 26rem;
+  }
+
+  .acciones [aria-disabled] {
+    opacity: 0.55;
+  }
+
+  .aviso {
+    flex-basis: 100%;
+    font-size: var(--text-mono-s);
+    color: var(--oxido-oscuro);
+    font-weight: 700;
+    min-height: 1.4em;
+  }
+
+  @media (min-width: 48rem) {
+    .servicios {
+      grid-template-columns: 1fr 1fr;
+      column-gap: 2rem;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .mesa {
+      grid-template-columns: minmax(0, 7fr) minmax(22rem, 5fr);
+      gap: clamp(2rem, 5vw, 5rem);
+    }
+
+    .caja {
+      position: sticky;
+      top: 1.5rem;
+      align-self: start;
+      justify-items: start;
+    }
+  }
+
+  /* ─── Impresión: solo la nota, en tinta, a todo lo ancho ─── */
+  @media print {
+    :global(.encabezado),
+    :global(.pie),
+    :global(.precaucion),
+    :global(.barra-movil),
+    :global(.skip),
+    .no-imprimir {
+      display: none !important;
+    }
+
+    :global(body) {
+      margin: 0 !important;
+    }
+
+    .mesa {
+      display: block;
+      padding: 0;
+    }
+
+    .ticket {
+      max-width: none;
+      width: 100%;
+      rotate: none;
+      filter: none;
+      mask: none;
+      background: #fff;
+      font-size: 11pt;
+      border: 1.5pt solid #000;
+      padding: 14mm 12mm;
+      print-color-adjust: exact;
+      -webkit-print-color-adjust: exact;
+    }
+
+    .t-nota {
+      display: none;
+    }
+
+    .t-sello {
+      animation: none !important;
+      opacity: 1 !important;
+    }
+  }
+
+  @page {
+    size: letter;
+    margin: 14mm;
+  }
+</style>

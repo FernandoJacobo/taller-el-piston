@@ -185,6 +185,14 @@
 
 @layer components {
   /* ─── Tipos ─────────────────────────────────────── */
+  /* "¿" de los titulares: sube para no invadir el renglón de abajo */
+  .abre {
+    display: inline-block;
+    font-size: 0.78em;
+    translate: 0 -0.14em;
+    margin-right: 0.02em;
+  }
+
   .datos {
     font-family: var(--font-datos);
     font-variant-numeric: tabular-nums slashed-zero;

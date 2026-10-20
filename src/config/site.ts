@@ -112,7 +112,9 @@ export const dayOrder: DayKey[] = ['lun', 'mar', 'mie', 'jue', 'vie', 'sab', 'do
 
 export const fullAddress = `${site.address.street}, ${site.address.neighborhood}, ${site.address.postalCode} ${site.address.city}, ${site.address.region}`;
 
-export const mapEmbedUrl = `https://www.google.com/maps?q=${site.geo.lat},${site.geo.lng}&z=16&output=embed`;
+/** Mapa embebido de OpenStreetMap (sin llave de API ni rastreo); el recuadro se calcula alrededor de site.geo */
+const caja = { lat: 0.0032, lng: 0.0045 };
+export const mapEmbedUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${[site.geo.lng - caja.lng, site.geo.lat - caja.lat, site.geo.lng + caja.lng, site.geo.lat + caja.lat].map((n) => n.toFixed(4)).join(",")}&layer=mapnik&marker=${site.geo.lat},${site.geo.lng}`;
 export const mapLinkUrl = `https://www.google.com/maps/dir/?api=1&destination=${site.geo.lat},${site.geo.lng}`;
 
 export const whatsappUrl = (text?: string) =>

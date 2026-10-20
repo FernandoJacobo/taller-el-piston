@@ -1,0 +1,738 @@
+---
+/**
+ * "Así va tu auto": el pizarrón del taller por placa. La lógica vive en src/lib/seguimiento.ts
+ * (probada); aquí solo se pinta. El estado de la demo se guarda en localStorage y se
+ * sincroniza entre pestañas con el evento `storage`.
+ */
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Ilustracion from '@/components/ui/Ilustracion.astro';
+import { ordenesDemo } from '@/data/ordenes';
+import { ilustraciones } from '@/data/ilustraciones';
+import { businessSchema } from '@/lib/schema';
+
+const usadas = [...new Set(ordenesDemo.flatMap((o) => o.fotos.map((f) => f.ilustracion)))].filter((n) => ilustraciones.includes(n));
+---
+
+<BaseLayout
+  title="Así va tu auto · seguimiento por placa"
+  description="Consulta con tu placa en qué paso va tu auto: diagnóstico, presupuesto para autorizar, reparación y entrega. Historial con hora y notas del mecánico."
+  folio="0004"
+  jsonLd={(og) => [businessSchema(og)]}
+>
+  <section class="cabeza contenedor" aria-labelledby="titulo">
+    <div>
+      <p class="etiqueta">Hoja 5 · Seguimiento</p>
+      <h1 id="titulo" class="titulo">Así va tu auto</h1>
+    </div>
+    <form class="buscar" data-buscar role="search">
+      <label class="etiqueta" for="placa">Escribe tu placa</label>
+      <div class="placa-fila">
+        <div class="placa-mx">
+          <span class="placa-edo datos" aria-hidden="true">JALISCO · MÉXICO</span>
+          <input id="placa" name="placa" class="datos" autocomplete="off" autocapitalize="characters" maxlength="10" placeholder="JAL-000-A" />
+        </div>
+        <button class="btn btn--tinta" type="submit">Ver</button>
+      </div>
+      <div class="sugerencias">
+        <span class="datos">Placas de prueba:</span>
+        {
+          ordenesDemo.map((o) => (
+            <button type="button" class="sug datos" data-placa={o.placa}>
+              {o.placa}
+            </button>
+          ))
+        }
+      </div>
+    </form>
+  </section>
+
+  <section class="tablero pizarron" aria-live="polite" aria-labelledby="pizarra-titulo">
+    <h2 id="pizarra-titulo" class="sr-only">Estado de la orden</h2>
+    <div class="contenedor" data-pizarra>
+      <div class="espera">
+        <p class="gis-titulo">Elige una placa de prueba o escribe la tuya.</p>
+        <p class="datos">En el taller real, aquí ves tu orden en cuanto la recibimos en el mostrador.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="contenedor pie-demo">
+    <p class="datos">Demo: las órdenes son ficticias y lo que autorizas se guarda solo en este navegador. Abre esta página en otra pestaña y autoriza: las dos se actualizan.</p>
+    <button class="btn btn--papel" type="button" data-reiniciar>Restablecer demo</button>
+  </div>
+
+  {
+    usadas.map((n) => (
+      <template data-ilus={n}>
+        <Ilustracion nombre={n} acento="mostaza" fondo="var(--papel)" />
+      </template>
+    ))
+  }
+</BaseLayout>
+
+<script>
+  import { estados, ordenesDemo } from '@/data/ordenes';
+  import { CLAVE_DEMO, autorizar, buscarOrden, leerEstado, normalizarPlaca, totales, vistaOrden, type EstadoDemo } from '@/lib/seguimiento';
+  import { formatMXN, whatsappUrl } from '@/config/site';
+
+  const pizarra = document.querySelector<HTMLElement>('[data-pizarra]')!;
+  const form = document.querySelector<HTMLFormElement>('[data-buscar]')!;
+  const input = form.querySelector<HTMLInputElement>('#placa')!;
+  let placaActual = '';
+
+  const leer = (): EstadoDemo => {
+    let raw: string | null = null;
+    try {
+      raw = localStorage.getItem(CLAVE_DEMO);
+    } catch {}
+    const e = leerEstado(raw, Date.now());
+    if (!raw) guardar(e);
+    return e;
+  };
+
+  const guardar = (e: EstadoDemo) => {
+    try {
+      localStorage.setItem(CLAVE_DEMO, JSON.stringify(e));
+    } catch {}
+  };
+
+  const esc = (t: string) => t.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+  const hora = (ms: number) => new Date(ms).toLocaleTimeString('es-MX', { hour: 'numeric', minute: '2-digit' });
+  const dia = (ms: number) => {
+    const d = new Date(ms);
+    const hoy = new Date();
+    const manana = new Date();
+    manana.setDate(hoy.getDate() + 1);
+    if (d.toDateString() === hoy.toDateString()) return 'hoy';
+    if (d.toDateString() === manana.toDateString()) return 'mañana';
+    const ayer = new Date();
+    ayer.setDate(hoy.getDate() - 1);
+    if (d.toDateString() === ayer.toDateString()) return 'ayer';
+    return d.toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'short' });
+  };
+  const ilus = (n: string) => document.querySelector<HTMLTemplateElement>(`template[data-ilus="${n}"]`)?.innerHTML ?? '';
+
+  function pintar() {
+    if (!placaActual) return;
+    const orden = buscarOrden(ordenesDemo, placaActual);
+    if (!orden) {
+      pintarNoEncontrada(placaActual);
+      return;
+    }
+    const v = vistaOrden(orden, leer());
+    const t = totales(v);
+    const estadoNombre = estados[v.paso].nombre;
+
+    pintarHTML(`
+      <header class="orden-cab">
+        <div>
+          <p class="datos meta">Folio N.º ${esc(v.folio)} · ${esc(v.auto)} · ${esc(v.color)} · ${v.km.toLocaleString('es-MX')} km</p>
+          <p class="placa-grande datos">${esc(v.placa)}</p>
+        </div>
+        <div class="estado-actual">
+          <p class="datos meta">Estado</p>
+          <p class="gis-titulo">${esc(estadoNombre)}</p>
+          <p class="datos meta">Entrega estimada: <b>${dia(v.entrega)}, ${hora(v.entrega)}</b></p>
+        </div>
+      </header>
+
+      <ol class="pasos" aria-label="Avance">
+        ${estados
+          .map(
+            (e, i) => `<li class="paso ${i < v.paso ? 'hecho' : ''} ${i === v.paso ? 'actual' : ''}" ${i === v.paso ? 'aria-current="step"' : ''}>
+              <span class="paso-n datos">${i + 1}</span>
+              <span class="paso-nombre">${esc(e.corto)}</span>
+              ${i === v.paso ? `<span class="iman datos">${esc(v.placa)}</span>` : ''}
+            </li>`,
+          )
+          .join('')}
+      </ol>
+
+      <div class="cuerpo">
+        <section class="col historial" aria-label="Historial">
+          <h3 class="col-titulo">Historial</h3>
+          <ol>
+            ${[...v.historial]
+              .reverse()
+              .map(
+                (e) => `<li><time class="datos">${dia(e.en)} · ${hora(e.en)}</time><span class="datos ev-estado">${esc(estados.find((x) => x.id === e.estado)?.corto ?? '')}</span><p>${esc(e.nota)}</p></li>`,
+              )
+              .join('')}
+          </ol>
+        </section>
+
+        <section class="col notas" aria-label="Notas del mecánico">
+          <h3 class="col-titulo">Dice ${esc(v.mecanico)}</h3>
+          <ul class="papelitos">
+            ${v.notasMecanico.map((n, i) => `<li style="--r:${[-1.5, 1.2, -0.6][i % 3]}deg">${esc(n)}</li>`).join('')}
+          </ul>
+          ${
+            v.piezas.length
+              ? `<h4 class="etiqueta">Piezas cambiadas</h4><ul class="piezas datos">${v.piezas.map((p) => `<li>${esc(p)}</li>`).join('')}</ul>`
+              : '<p class="datos sin-piezas">Todavía no se cambia ninguna pieza.</p>'
+          }
+          <div class="fotos">
+            ${v.fotos
+              .map((f, i) => `<figure style="--r:${[2, -2.5][i % 2]}deg">${ilus(f.ilustracion)}<figcaption class="datos">${esc(f.pie)}</figcaption></figure>`)
+              .join('')}
+          </div>
+          <p class="datos aviso-foto">Fotos ilustrativas. En el taller real te llegan las fotos de tu auto.</p>
+        </section>
+
+        <section class="col presupuesto" aria-label="Presupuesto">
+          <h3 class="col-titulo">Presupuesto</h3>
+          ${
+            v.presupuesto.length
+              ? `<div class="hoja nota-pres">
+              <table class="datos">
+                <thead><tr><th scope="col">Concepto</th><th scope="col">Ref.</th><th scope="col">M.O.</th></tr></thead>
+                <tbody>${v.presupuesto.map((c) => `<tr><th scope="row">${esc(c.concepto)}</th><td>${formatMXN(c.refaccion)}</td><td>${formatMXN(c.manoObra)}</td></tr>`).join('')}</tbody>
+                <tfoot>
+                  <tr><th scope="row">Subtotal</th><td colspan="2">${formatMXN(t.subtotal)}</td></tr>
+                  <tr><th scope="row">IVA 16 %</th><td colspan="2">${formatMXN(t.iva)}</td></tr>
+                  <tr class="total"><th scope="row">Total</th><td colspan="2">${formatMXN(t.total)}</td></tr>
+                </tfoot>
+              </table>
+              ${
+                v.puedeAutorizar
+                  ? `<button class="btn btn--oxido autorizar" type="button" data-autorizar>Autorizar reparación</button><p class="datos letra">Al autorizar, ${esc(v.mecanico)} empieza. Si aparece algo más, te avisamos antes.</p>`
+                  : v.autorizado
+                    ? '<p class="sello sello--doble autorizado" style="--r:-6deg" data-estampa>Autorizado</p>'
+                    : ''
+              }
+            </div>`
+              : '<p class="gis-chico">El presupuesto sale en cuanto terminemos el diagnóstico. Te avisamos por WhatsApp.</p>'
+          }
+          <a class="subrayado datos dudas" href="${whatsappUrl(`Hola, tengo una duda de mi orden N.º ${v.folio} (placa ${v.placa}).`)}" target="_blank" rel="noopener">¿Dudas? Escríbele al mostrador →</a>
+        </section>
+      </div>
+    `);
+
+    pizarra.querySelector('[data-autorizar]')?.addEventListener('click', () => {
+      guardar(autorizar(leer(), orden, Date.now()));
+      pintar();
+      pizarra.querySelector<HTMLElement>('.autorizado')?.classList.add('estampado');
+      pizarra.querySelector<HTMLElement>('.estado-actual')?.focus();
+    });
+  }
+
+  function pintarHTML(html: string) {
+    pizarra.innerHTML = html;
+    pizarra.querySelector('.estado-actual')?.setAttribute('tabindex', '-1');
+  }
+
+  function pintarNoEncontrada(placa: string) {
+    pintarHTML(`<div class="espera">
+      <p class="gis-titulo">No tenemos la placa ${esc(placa.toUpperCase())} en el pizarrón.</p>
+      <p class="datos">En esta demo solo existen las 4 placas de prueba. En el taller real, la tuya aparece cuando entra tu auto.</p>
+      <a class="btn" href="${whatsappUrl(`Hola, quiero saber cómo va mi auto, placa ${placa.toUpperCase()}.`)}" target="_blank" rel="noopener">Preguntar por WhatsApp</a>
+    </div>`);
+  }
+
+  function ver(placa: string, empujar = true) {
+    placaActual = placa.trim();
+    input.value = placaActual.toUpperCase();
+    document.querySelectorAll<HTMLButtonElement>('.sug').forEach((b) => b.setAttribute('aria-pressed', String(normalizarPlaca(b.dataset.placa!) === normalizarPlaca(placaActual))));
+    if (empujar) {
+      const url = new URL(location.href);
+      url.searchParams.set('placa', placaActual.toUpperCase());
+      history.replaceState(null, '', url);
+    }
+    pintar();
+  }
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (input.value.trim()) ver(input.value);
+  });
+  form.addEventListener('click', (e) => {
+    const b = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-placa]');
+    if (b) ver(b.dataset.placa!);
+  });
+
+  // Otra pestaña autorizó o reinició la demo
+  addEventListener('storage', (e) => {
+    if (e.key === CLAVE_DEMO || e.key === null) pintar();
+  });
+
+  document.querySelector('[data-reiniciar]')!.addEventListener('click', () => {
+    try {
+      localStorage.removeItem(CLAVE_DEMO);
+    } catch {}
+    leer();
+    pintar();
+  });
+
+  leer();
+  const inicial = new URLSearchParams(location.search).get('placa');
+  if (inicial) ver(inicial, false);
+</script>
+
+<style>
+  .cabeza {
+    display: grid;
+    gap: 1.5rem;
+    padding-block: clamp(1.5rem, 4vw, 3rem) 2.2rem;
+  }
+
+  .cabeza .etiqueta {
+    color: var(--oxido-oscuro);
+  }
+
+  .titulo {
+    font-size: var(--text-rotulo-l);
+    margin-top: 0.4rem;
+  }
+
+  .buscar {
+    display: grid;
+    gap: 0.6rem;
+    max-width: 32rem;
+  }
+
+  .placa-fila {
+    display: flex;
+    gap: 0.8rem;
+    align-items: stretch;
+  }
+
+  /* Placa mexicana: lámina blanca, franja superior, letras de molde */
+  .placa-mx {
+    flex: 1;
+    display: grid;
+    padding: 0.35rem 0.8rem 0.4rem;
+    background: #fbfaf6;
+    border: 3px solid var(--grasa);
+    border-radius: var(--radius-ticket);
+    box-shadow: var(--shadow-2);
+  }
+
+  .placa-edo {
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-align: center;
+    color: var(--oxido-oscuro);
+    border-bottom: 2px solid var(--grasa);
+    padding-bottom: 0.15rem;
+  }
+
+  .placa-mx input {
+    width: 100%;
+    min-height: 3rem;
+    border: 0;
+    background: transparent;
+    font-size: clamp(1.6rem, 1.2rem + 1.6vw, 2.3rem);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-align: center;
+    text-transform: uppercase;
+  }
+
+  .placa-mx input:focus-visible {
+    outline: 3px solid var(--mostaza);
+  }
+
+  .placa-mx:focus-within {
+    outline: 3px solid var(--oxido-oscuro);
+    outline-offset: 3px;
+  }
+
+  .sugerencias {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 0.6rem;
+    align-items: center;
+    font-size: var(--text-mono-xs);
+  }
+
+  .sug {
+    min-height: 44px;
+    padding: 0 0.7rem;
+    border: 2px solid var(--grasa);
+    background: var(--papel);
+    font-weight: 700;
+    font-size: 0.82rem;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    box-shadow: var(--shadow-1);
+  }
+
+  .sug:active {
+    translate: 1px 1px;
+    box-shadow: none;
+  }
+
+  .sug[aria-pressed='true'] {
+    background: var(--mostaza);
+  }
+
+  /* ─── Pizarrón ─── */
+  .tablero {
+    padding-block: clamp(2.5rem, 6vw, 4.5rem);
+    border-block: 10px solid #5b4632;
+    box-shadow: inset 0 0 80px rgb(0 0 0 / 0.55);
+    min-height: 22rem;
+  }
+
+  .tablero :global(.espera) {
+    display: grid;
+    gap: 1rem;
+    justify-items: start;
+    max-width: 38rem;
+  }
+
+  .tablero :global(.gis-titulo) {
+    font-family: var(--font-rotulo);
+    font-weight: 900;
+    text-transform: uppercase;
+    font-size: var(--text-rotulo-m);
+    line-height: 0.9;
+    color: var(--gis);
+    filter: url(#trazo-gis);
+  }
+
+  .tablero :global(.gis-chico) {
+    font-size: 1.05rem;
+    color: rgb(237 232 218 / 0.9);
+    border: 2px dashed rgb(237 232 218 / 0.5);
+    padding: 0.8rem;
+  }
+
+  .tablero :global(.meta) {
+    font-size: var(--text-mono-xs);
+    color: rgb(237 232 218 / 0.8);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .tablero :global(.meta b) {
+    color: var(--mostaza);
+  }
+
+  .tablero :global(.orden-cab) {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 1.5rem 3rem;
+  }
+
+  .tablero :global(.placa-grande) {
+    font-size: clamp(2rem, 1.2rem + 4vw, 4.4rem);
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: var(--mostaza);
+    line-height: 1.1;
+  }
+
+  .tablero :global(.estado-actual) {
+    outline: none;
+  }
+
+  .tablero :global(.pasos) {
+    list-style: none;
+    margin: 2.2rem 0 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    border-top: 2px solid rgb(237 232 218 / 0.5);
+  }
+
+  .tablero :global(.paso) {
+    display: grid;
+    align-content: start;
+    gap: 0.35rem;
+    min-height: 6.5rem;
+    padding: 0.6rem 0.5rem;
+    border-left: 2px solid rgb(237 232 218 / 0.3);
+    color: rgb(237 232 218 / 0.55);
+  }
+
+  .tablero :global(.paso:last-child) {
+    border-right: 2px solid rgb(237 232 218 / 0.3);
+  }
+
+  .tablero :global(.paso-n) {
+    font-size: 0.75rem;
+  }
+
+  .tablero :global(.paso-nombre) {
+    font-family: var(--font-rotulo);
+    font-weight: 800;
+    text-transform: uppercase;
+    font-size: clamp(0.95rem, 0.7rem + 1vw, 1.5rem);
+    line-height: 1;
+    overflow-wrap: anywhere;
+  }
+
+  .tablero :global(.paso.hecho) {
+    color: var(--gis);
+  }
+
+  .tablero :global(.paso.hecho .paso-nombre)::after {
+    content: ' ✓';
+    color: var(--mostaza);
+  }
+
+  .tablero :global(.paso.actual) {
+    color: var(--gis);
+    background: rgb(232 180 34 / 0.1);
+  }
+
+  .tablero :global(.iman) {
+    justify-self: start;
+    margin-top: 0.3rem;
+    padding: 0.25rem 0.45rem;
+    background: var(--mostaza);
+    color: var(--grasa);
+    border: 2px solid #000;
+    font-weight: 700;
+    font-size: clamp(0.62rem, 0.5rem + 0.4vw, 0.85rem);
+    rotate: -2deg;
+    box-shadow: 3px 3px 0 #000;
+    white-space: nowrap;
+  }
+
+  .tablero :global(.cuerpo) {
+    display: grid;
+    gap: 2.5rem;
+    margin-top: 2.5rem;
+  }
+
+  .tablero :global(.col-titulo) {
+    font-size: var(--text-rotulo-s);
+    color: var(--gis);
+    filter: url(#trazo-gis);
+    border-bottom: 2px solid rgb(237 232 218 / 0.5);
+    padding-bottom: 0.4rem;
+    margin-bottom: 1rem;
+  }
+
+  .tablero :global(.historial ol) {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 1rem;
+  }
+
+  .tablero :global(.historial li) {
+    display: grid;
+    gap: 0.15rem;
+    padding-left: 0.9rem;
+    border-left: 3px solid rgb(232 180 34 / 0.6);
+  }
+
+  .tablero :global(.historial li:first-child) {
+    border-left-color: var(--mostaza);
+  }
+
+  .tablero :global(.historial time) {
+    font-size: var(--text-mono-xs);
+    color: var(--mostaza);
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  .tablero :global(.ev-estado) {
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgb(237 232 218 / 0.7);
+  }
+
+  .tablero :global(.historial p) {
+    font-size: 0.95rem;
+    color: rgb(237 232 218 / 0.92);
+  }
+
+  .tablero :global(.papelitos) {
+    list-style: none;
+    margin: 0 0 1.2rem;
+    padding: 0;
+    display: grid;
+    gap: 0.8rem;
+  }
+
+  .tablero :global(.papelitos li) {
+    padding: 0.7rem 0.8rem;
+    background: var(--papel);
+    color: var(--grasa);
+    font-size: 0.93rem;
+    line-height: 1.4;
+    rotate: var(--r);
+    box-shadow: 3px 3px 0 #000;
+  }
+
+  .tablero :global(.notas .etiqueta) {
+    color: var(--mostaza);
+    margin-bottom: 0.4rem;
+  }
+
+  .tablero :global(.piezas) {
+    margin: 0 0 1.2rem;
+    padding-left: 1.1rem;
+    font-size: var(--text-mono-s);
+  }
+
+  .tablero :global(.sin-piezas) {
+    font-size: var(--text-mono-xs);
+    color: rgb(237 232 218 / 0.75);
+    margin-bottom: 1.2rem;
+  }
+
+  .tablero :global(.fotos) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .tablero :global(.fotos figure) {
+    margin: 0;
+    width: 9.5rem;
+    padding: 0.5rem 0.5rem 0.4rem;
+    background: var(--papel);
+    color: var(--grasa);
+    rotate: var(--r);
+    box-shadow: 3px 3px 0 #000;
+  }
+
+  .tablero :global(.fotos svg) {
+    width: 100%;
+    aspect-ratio: 1;
+    background: var(--kraft);
+    padding: 0.6rem;
+    border: 2px solid var(--grasa);
+  }
+
+  .tablero :global(.fotos figcaption) {
+    font-size: 0.66rem;
+    line-height: 1.3;
+    margin-top: 0.3rem;
+  }
+
+  .tablero :global(.aviso-foto) {
+    margin-top: 0.8rem;
+    font-size: 0.68rem;
+    color: rgb(237 232 218 / 0.7);
+  }
+
+  .tablero :global(.nota-pres) {
+    padding: 1rem;
+    color: var(--grasa);
+    box-shadow: 5px 5px 0 #000;
+    rotate: -0.5deg;
+  }
+
+  .tablero :global(.nota-pres table) {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8rem;
+  }
+
+  .tablero :global(.nota-pres th),
+  .tablero :global(.nota-pres td) {
+    padding: 0.35rem 0.2rem;
+    border-bottom: 1.5px dashed rgb(20 18 15 / 0.4);
+    text-align: right;
+    vertical-align: top;
+  }
+
+  .tablero :global(.nota-pres th[scope='row']),
+  .tablero :global(.nota-pres thead th:first-child) {
+    text-align: left;
+    font-weight: 400;
+  }
+
+  .tablero :global(.nota-pres thead th) {
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--acero);
+    border-bottom: 2px solid var(--grasa);
+  }
+
+  .tablero :global(.nota-pres .total th),
+  .tablero :global(.nota-pres .total td) {
+    font-weight: 700;
+    font-size: 1.05rem;
+    border-bottom: 3px double var(--grasa);
+  }
+
+  .tablero :global(.autorizar) {
+    margin-top: 1rem;
+    width: 100%;
+  }
+
+  .tablero :global(.letra) {
+    margin-top: 0.5rem;
+    font-size: 0.7rem;
+    color: var(--acero);
+  }
+
+  .tablero :global(.autorizado) {
+    margin-top: 1rem;
+    font-size: 2rem;
+    padding: 0.3rem 0.9rem;
+  }
+
+  .tablero :global(.dudas) {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    margin-top: 1rem;
+    font-size: var(--text-mono-s);
+    text-decoration-color: var(--mostaza);
+  }
+
+  .pie-demo {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 2rem;
+    align-items: center;
+    justify-content: space-between;
+    padding-block: 1.6rem 4rem;
+  }
+
+  .pie-demo p {
+    max-width: 40rem;
+    font-size: var(--text-mono-xs);
+    color: var(--acero-oscuro);
+  }
+
+  @media (max-width: 39.99rem) {
+    .tablero :global(.pasos) {
+      grid-template-columns: 1fr;
+      border-top: 0;
+    }
+
+    .tablero :global(.paso) {
+      grid-template-columns: 1.5rem 1fr auto;
+      align-items: center;
+      min-height: 3rem;
+      border-left: 0;
+      border-bottom: 2px solid rgb(237 232 218 / 0.3);
+    }
+
+    .tablero :global(.paso:last-child) {
+      border-right: 0;
+    }
+
+    .tablero :global(.iman) {
+      margin: 0;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .cabeza {
+      grid-template-columns: 1fr auto;
+      align-items: end;
+    }
+
+    .tablero :global(.cuerpo) {
+      grid-template-columns: 1.1fr 1fr 1fr;
+      gap: 3rem;
+    }
+  }
+</style>

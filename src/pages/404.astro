@@ -1,0 +1,81 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Ilustracion from '@/components/ui/Ilustracion.astro';
+---
+
+<BaseLayout title="Página no encontrada" description="Esta página no existe." noindex folio="0404">
+  <section class="perdida contenedor pegboard" aria-labelledby="titulo">
+    <div class="silueta" aria-hidden="true">
+      <Ilustracion nombre="llave-cruz" fondo="var(--papel)" trazo={2.6} />
+    </div>
+    <div class="texto">
+      <p class="datos codigo">Error 404 · folio sin orden</p>
+      <h1 id="titulo" class="titulo">Esta página está en el elevador.</h1>
+      <p class="lead">La subimos para revisarla y todavía no baja. Mientras, vuelve al inicio o dinos qué buscabas.</p>
+      <div class="acciones">
+        <a class="btn" href="/">Volver al inicio</a>
+        <a class="subrayado datos" href="/servicios">o ve la lista de precios →</a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .perdida {
+    display: grid;
+    gap: 2rem;
+    align-items: center;
+    margin-block: 2rem 4rem;
+    padding-block: clamp(2rem, 6vw, 5rem);
+    border-block: var(--borde);
+  }
+
+  .silueta {
+    justify-self: center;
+    width: min(70vw, 22rem);
+    padding: 1.5rem;
+    border: 3px dashed rgb(20 18 15 / 0.6);
+    rotate: -8deg;
+  }
+
+  .texto {
+    padding: 1.4rem;
+    background: var(--kraft);
+    border: var(--borde);
+    box-shadow: var(--shadow-3);
+    max-width: 40rem;
+  }
+
+  .codigo {
+    font-size: var(--text-mono-s);
+    color: var(--oxido-oscuro);
+    font-weight: 700;
+  }
+
+  .titulo {
+    font-size: var(--text-rotulo-m);
+    margin: 0.4rem 0 1rem;
+  }
+
+  .acciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 1.5rem;
+    align-items: center;
+    margin-top: 1.4rem;
+  }
+
+  .acciones .subrayado {
+    font-weight: 700;
+    font-size: var(--text-mono-s);
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  @media (min-width: 64rem) {
+    .perdida {
+      grid-template-columns: 5fr 7fr;
+    }
+  }
+</style>
