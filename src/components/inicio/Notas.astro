@@ -1,0 +1,296 @@
+---
+/**
+ * H · Tablero perforado (pegboard) con papelitos de clientes: cada uno con su papel,
+ * su tamaño y su forma de sujetarse. Sin estrellas, sin avatares, sin carrusel.
+ */
+import { notas } from '@/data/notas';
+import Ilustracion from '@/components/ui/Ilustracion.astro';
+
+const sujecion = ['tachuela', 'cinta', 'tachuela', 'cinta', 'grapa', 'tachuela'];
+const giros = [-2.5, 1.8, -1, 2.6, -1.8, 1.2];
+---
+
+<section class="notas pegboard" aria-labelledby="notas-titulo">
+  <div class="contenedor">
+    <header class="cabeza">
+      <h2 id="notas-titulo" class="titulo">Lo que nos dejan pegado</h2>
+      <p class="intro datos">El tablero junto a la caja. Las notas las escriben los clientes; nosotros solo les ponemos tachuela.</p>
+    </header>
+
+    <ul class="tablero-notas">
+      {
+        notas.map((n, i) => (
+          <li class:list={['papel', `papel--${n.forma}`, `pos--${i + 1}`]} style={`--r:${giros[i]}deg`}>
+            {sujecion[i] === 'tachuela' && <span class="tachuela" style={`left:calc(50% - 0.5rem); top:-0.4rem; --c:var(--${i % 2 ? 'mostaza' : 'oxido'})`} />}
+            {sujecion[i] === 'cinta' && <span class="cinta" style={`--r:${i % 2 ? 4 : -5}deg; left:calc(50% - 3.2rem); top:-0.85rem`} />}
+            {sujecion[i] === 'grapa' && <span class="grapa" style="left:1rem; top:0.5rem" />}
+            <blockquote>
+              {n.forma === 'tarjeta' && <p class="membrete" aria-hidden="true">{n.firma} · {n.auto}</p>}
+              {n.forma === 'servilleta' && <Ilustracion nombre="ventilador" class="dibujito" acento="grasa" trazo={2.4} fondo="transparent" />}
+              <p class:list={['texto', { plumon: n.forma === 'mano' }]} style={n.forma === 'mano' ? '--r:0deg' : undefined}>
+                {n.texto}
+              </p>
+              <footer class="datos">
+                <cite>{n.firma}</cite> · {n.auto} · <time>{n.fecha}</time>
+              </footer>
+            </blockquote>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<div class="marquee" aria-hidden="true">
+  <div class="pista">
+    {
+      [0, 1].map(() => (
+        <span>Afinación ✕ Frenos ✕ Clutch ✕ Suspensión ✕ Aire acondicionado ✕ Escáner ✕ Alineación ✕ Grúa ✕&nbsp;</span>
+      ))
+    }
+  </div>
+</div>
+
+<style>
+  .notas {
+    position: relative;
+    padding-block: clamp(3.5rem, 8vw, 6rem) clamp(4rem, 9vw, 7rem);
+    border-top: var(--borde);
+  }
+
+  .cabeza {
+    display: inline-grid;
+    gap: 0.6rem;
+    padding: 1rem 1.2rem 1.1rem;
+    background: var(--grasa);
+    color: var(--papel);
+    box-shadow: var(--shadow-2);
+    rotate: -1deg;
+    max-width: 34rem;
+  }
+
+  .titulo {
+    font-size: var(--text-rotulo-m);
+    color: var(--mostaza);
+  }
+
+  .intro {
+    font-size: var(--text-mono-xs);
+    color: rgb(245 239 224 / 0.85);
+  }
+
+  .tablero-notas {
+    list-style: none;
+    margin: 3rem 0 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2.4rem 1rem;
+    align-items: start;
+  }
+
+  .papel {
+    position: relative;
+    rotate: var(--r);
+    box-shadow: 3px 4px 0 rgb(20 18 15 / 0.45);
+  }
+
+  blockquote {
+    margin: 0;
+    padding: 1rem;
+  }
+
+  .texto {
+    font-size: 0.95rem;
+    line-height: 1.45;
+  }
+
+  footer {
+    margin-top: 0.8rem;
+    font-size: 0.68rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--acero-oscuro);
+  }
+
+  cite {
+    font-style: normal;
+    font-weight: 700;
+    color: var(--grasa);
+  }
+
+  /* ─── Tipos de papel ─── */
+  .papel--cuadro {
+    background: var(--mostaza);
+  }
+
+  .papel--cuadro blockquote {
+    padding: 1.4rem 1.2rem 2.2rem;
+  }
+
+  .papel--cuadro .texto {
+    font-weight: 600;
+    font-size: 1.02rem;
+  }
+
+  .papel--cuadro footer {
+    color: var(--grasa);
+  }
+
+  .papel--ticket {
+    background: #fbf8f0;
+    font-family: var(--font-datos);
+    clip-path: polygon(0 0, 100% 0, 100% 96%, 92% 100%, 84% 96%, 76% 100%, 68% 96%, 60% 100%, 52% 96%, 44% 100%, 36% 96%, 28% 100%, 20% 96%, 12% 100%, 4% 96%, 0 100%);
+    box-shadow: none;
+    filter: drop-shadow(3px 4px 0 rgb(20 18 15 / 0.4));
+  }
+
+  .papel--ticket .texto {
+    font-family: var(--font-datos);
+    font-size: 0.82rem;
+    text-transform: uppercase;
+  }
+
+  .papel--ticket blockquote {
+    padding-bottom: 1.6rem;
+    border-top: 6px solid var(--grasa);
+  }
+
+  .papel--mano {
+    background: var(--papel) repeating-linear-gradient(transparent 0 1.55rem, rgb(89 100 107 / 0.35) 1.55rem calc(1.55rem + 1px));
+    border-left: 3px double var(--oxido);
+  }
+
+  .papel--mano .texto {
+    font-size: 1.45rem;
+    line-height: 1.07;
+    color: var(--pluma);
+  }
+
+  .papel--tarjeta {
+    background: #fffdf7;
+    border: var(--borde);
+    box-shadow: var(--shadow-2);
+  }
+
+  .membrete {
+    display: block;
+    margin-bottom: 0.6rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 2px solid var(--grasa);
+    font-family: var(--font-datos);
+    font-size: 0.62rem;
+    letter-spacing: 0.14em;
+    font-weight: 700;
+  }
+
+  .papel--servilleta {
+    background: #f9f6ee;
+    clip-path: polygon(1% 2%, 12% 0, 30% 2%, 52% 0, 75% 2%, 99% 0, 100% 30%, 98% 60%, 100% 99%, 70% 98%, 40% 100%, 10% 98%, 0 100%, 2% 60%, 0 30%);
+    box-shadow: none;
+    filter: drop-shadow(2px 3px 0 rgb(20 18 15 / 0.35));
+  }
+
+  .papel--servilleta :global(.dibujito) {
+    float: right;
+    width: 4.2rem;
+    margin: 0 0 0.4rem 0.6rem;
+    rotate: 8deg;
+  }
+
+  .papel--recibo {
+    background: #efe4d0;
+    border-top: 2px dashed var(--grasa);
+  }
+
+  .papel--recibo blockquote {
+    border-left: 2px solid var(--oxido-oscuro);
+    margin: 0.6rem;
+    padding: 0.4rem 0.7rem;
+  }
+
+  @media (max-width: 39.99rem) {
+    .tablero-notas {
+      grid-template-columns: 1fr;
+    }
+
+    .papel:nth-child(odd) {
+      margin-right: 2.5rem;
+    }
+
+    .papel:nth-child(even) {
+      margin-left: 2.5rem;
+    }
+
+  }
+
+  @media (min-width: 64rem) {
+    .tablero-notas {
+      grid-template-columns: repeat(12, 1fr);
+      gap: 2rem 1.6rem;
+    }
+
+    .pos--1 {
+      grid-column: 1 / span 3;
+      margin-top: 2rem;
+    }
+    .pos--2 {
+      grid-column: 4 / span 3;
+      margin-top: -2rem;
+    }
+    .pos--3 {
+      grid-column: 8 / span 4;
+      margin-top: 1rem;
+    }
+    .pos--4 {
+      grid-column: 2 / span 4;
+      margin-top: 1rem;
+    }
+    .pos--5 {
+      grid-column: 7 / span 3;
+      margin-top: -3rem;
+    }
+    .pos--6 {
+      grid-column: 10 / span 3;
+      margin-top: 2.5rem;
+    }
+  }
+
+  /* ─── Marquee (el único del sitio) ─── */
+  .marquee {
+    overflow: hidden;
+    background: var(--papel);
+    border-block: var(--borde);
+    padding-block: 0.5rem 0.35rem;
+  }
+
+  .pista {
+    display: flex;
+    width: max-content;
+  }
+
+  .pista span {
+    font-family: var(--font-rotulo);
+    font-weight: 900;
+    font-size: var(--text-rotulo-s);
+    text-transform: uppercase;
+    white-space: nowrap;
+    line-height: 1;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .pista {
+      animation: correr 60s linear infinite;
+    }
+
+    .marquee:hover .pista {
+      animation-play-state: paused;
+    }
+  }
+
+  @keyframes correr {
+    to {
+      translate: -50% 0;
+    }
+  }
+</style>

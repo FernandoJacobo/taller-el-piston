@@ -1,0 +1,236 @@
+---
+/**
+ * G · Gafetes escalonados en diagonal. Cada mecánico cuelga de su clip, con la foto
+ * (duotono + trama) de su herramienta favorita recortada con forma irregular.
+ */
+import { Image } from 'astro:assets';
+import { equipo } from '@/data/equipo';
+
+const anio = new Date().getFullYear();
+const recortes = [
+  'polygon(0 3%, 97% 0, 100% 94%, 4% 100%)',
+  'polygon(3% 0, 100% 4%, 96% 100%, 0 95%)',
+  'polygon(0 0, 100% 2%, 98% 97%, 2% 100%)',
+  'polygon(2% 4%, 99% 0, 100% 100%, 0 96%)',
+];
+---
+
+<section class="equipo" aria-labelledby="equipo-titulo">
+  <div class="contenedor">
+    <header class="cabeza">
+      <h2 id="equipo-titulo" class="titulo">Los de abajo del cofre</h2>
+      <p class="intro">Cuatro personas, {anio - equipo.reduce((m, p) => Math.min(m, p.desde), anio)} años del más viejo en el oficio. Aquí no hay "asesores": el que te atiende es el que mete las manos.</p>
+    </header>
+
+    <ul class="escalera">
+      {
+        equipo.map((m, i) => (
+          <li class:list={['gafete', `gafete--${i + 1}`]}>
+            <span class="clip" aria-hidden="true" />
+            <div class="foto-duo" style={`clip-path:${recortes[i]}`}>
+              <span class="respaldo">Foto: la herramienta de {m.apodo}</span>
+              <Image src={m.foto} alt={m.fotoAlt} widths={[280, 420, 560]} sizes="(min-width: 64rem) 22vw, (min-width: 40rem) 40vw, 80vw" loading="lazy" decoding="async" onerror="this.parentElement.classList.add('sin-foto')" format="webp" quality={60} />
+            </div>
+            <div class="datos-gafete">
+              <p class="apodo rotulo">{m.apodo}</p>
+              <p class="nombre datos">
+                {m.nombre} · en el oficio desde {m.desde} ({anio - m.desde} años)
+              </p>
+              <p class="esp">{m.especialidad}</p>
+              <p class="herr">
+                <span class="etiqueta">Su herramienta favorita</span>
+                {m.herramienta}
+              </p>
+              <p class="frase">{m.frase}</p>
+            </div>
+            {m.apodo === 'El Chato' && (
+              <p class="plumon nota" style="--r:-6deg">
+                el Chato no presta su matraca
+              </p>
+            )}
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .equipo {
+    padding-block: clamp(3.5rem, 8vw, 6.5rem);
+  }
+
+  .cabeza {
+    display: grid;
+    gap: 1rem;
+    max-width: 52rem;
+  }
+
+  .titulo {
+    font-size: var(--text-rotulo-l);
+  }
+
+  .intro {
+    max-width: 30rem;
+    font-size: var(--text-lead);
+  }
+
+  .escalera {
+    list-style: none;
+    margin: 3rem 0 0;
+    padding: 0;
+    display: grid;
+    gap: 3.5rem;
+  }
+
+  .gafete {
+    position: relative;
+    width: min(100%, 21rem);
+    padding: 1.6rem 0.8rem 1rem;
+    background: var(--papel);
+    background-image: var(--grano);
+    border: var(--borde);
+    box-shadow: var(--shadow-2);
+  }
+
+  /* Zigzag en móvil: alternan lado y rotación */
+  .gafete:nth-child(odd) {
+    rotate: -1.5deg;
+  }
+
+  .gafete:nth-child(even) {
+    justify-self: end;
+    rotate: 1.8deg;
+  }
+
+  .clip {
+    position: absolute;
+    top: -1.1rem;
+    left: 50%;
+    width: 2.4rem;
+    height: 1.7rem;
+    translate: -50% 0;
+    border: 3px solid var(--acero);
+    border-bottom: 0;
+    border-radius: 0.5rem 0.5rem 0 0;
+  }
+
+  .clip::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: -0.65rem;
+    width: 1.4rem;
+    height: 0.5rem;
+    translate: -50% 0;
+    background: var(--kraft);
+    border: 2px solid var(--grasa);
+  }
+
+  .foto-duo {
+    aspect-ratio: 4 / 3;
+    border: var(--borde);
+  }
+
+  .datos-gafete {
+    display: grid;
+    gap: 0.45rem;
+    margin-top: 0.9rem;
+  }
+
+  .apodo {
+    font-size: clamp(2.2rem, 1.6rem + 2vw, 3.2rem);
+    line-height: 0.85;
+  }
+
+  .nombre {
+    font-size: var(--text-mono-xs);
+    color: var(--acero);
+    font-weight: 700;
+  }
+
+  .esp {
+    font-size: 0.95rem;
+    line-height: 1.4;
+  }
+
+  .herr {
+    font-size: 0.9rem;
+    line-height: 1.4;
+    padding: 0.45rem 0.55rem;
+    background: rgb(232 180 34 / 0.28);
+    border-left: 4px solid var(--mostaza);
+  }
+
+  .herr .etiqueta {
+    display: block;
+    color: var(--acero-oscuro);
+    font-size: 0.65rem;
+  }
+
+  .frase {
+    font-family: var(--font-datos);
+    font-size: var(--text-mono-s);
+  }
+
+  .nota {
+    position: absolute;
+    right: -0.5rem;
+    bottom: -2.4rem;
+    font-size: 1.4rem;
+    white-space: nowrap;
+  }
+
+  @media (min-width: 40rem) {
+    .escalera {
+      grid-template-columns: 1fr 1fr;
+      column-gap: 2rem;
+    }
+
+    .gafete:nth-child(even) {
+      justify-self: start;
+      margin-top: 5rem;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    /* Escalera descendente: cada gafete más abajo y de distinto ancho */
+    .escalera {
+      display: flex;
+      align-items: flex-start;
+      gap: clamp(1rem, 2vw, 2rem);
+      margin-top: -4rem;
+    }
+
+    .gafete {
+      flex: none;
+    }
+
+    .gafete--1 {
+      width: 22%;
+      margin-top: 7rem;
+    }
+
+    .gafete--2 {
+      width: 19%;
+      margin-top: 12rem !important;
+    }
+
+    .gafete--3 {
+      width: 25%;
+      margin-top: 17rem;
+    }
+
+    .gafete--4 {
+      width: 21%;
+      margin-top: 23rem !important;
+    }
+
+    .nota {
+      right: auto;
+      left: 1rem;
+      bottom: auto;
+      top: -3.4rem;
+    }
+  }
+</style>

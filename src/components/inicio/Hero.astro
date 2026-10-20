@@ -1,0 +1,345 @@
+---
+/**
+ * B · Titular desbordado + hoja encimada (DISENO.md §3).
+ * El titular se sale por la derecha a propósito; la orden llenada a mano se monta encima.
+ */
+import { site } from '@/config/site';
+import { ordenesDemo } from '@/data/ordenes';
+import Ilustracion from '@/components/ui/Ilustracion.astro';
+import SelloGiratorio from '@/components/ui/SelloGiratorio.astro';
+
+const ejemplo = ordenesDemo[0];
+---
+
+<section class="hero" aria-labelledby="hero-titulo">
+  <div class="contenedor marco">
+    <p class="ubicacion etiqueta">
+      <span>Mecánica en general</span>
+      <span>desde {site.foundingYear}</span>
+      <span>{site.address.neighborhood}, {site.address.city}</span>
+    </p>
+
+    <h1 id="hero-titulo" class="titular">
+      <span class="l1">Si suena</span>
+      <span class="l2">raro, no</span>
+      <span class="l3">es normal.</span>
+    </h1>
+
+    <Ilustracion nombre="llave-cruz" class="llave" acento="oxido" fondo="var(--kraft)" trazo={2.4} />
+
+    <div class="texto">
+      <p class="lema">{site.slogan}</p>
+      <p class="lead">
+        Te revisamos el auto sin costo si la reparación se hace aquí, te enseñamos la pieza antes de cambiarla y el precio va por escrito. Luego decides tú.
+      </p>
+      <div class="acciones">
+        <a class="btn" href="#orden">Llenar mi orden de servicio</a>
+        <a class="subrayado datos secundario" href="#diagnostico">o dime qué le suena →</a>
+      </div>
+    </div>
+
+    <article class="hoja orden" aria-label="Ejemplo de una orden de servicio llenada a mano">
+      <span class="cinta" style="--r:-8deg; left:-1.6rem; top:-0.9rem"></span>
+      <span class="cinta cinta--mostaza" style="--r:6deg; --w:5rem; right:-1.2rem; bottom:3.2rem"></span>
+      <header class="orden-cab">
+        <span class="rotulo">Orden de servicio</span>
+        <span class="datos folio">N.º {ejemplo.folio}</span>
+      </header>
+      <dl class="renglones">
+        <div><dt>Placa</dt><dd class="mano">{ejemplo.placa}</dd></div>
+        <div><dt>Auto</dt><dd class="mano">Sedán 2014 · 148,320 km</dd></div>
+        <div class="falla"><dt>Falla</dt><dd class="mano">Rechina de adelante al frenar y en bajada vibra el pedal</dd></div>
+      </dl>
+      <ul class="marcas datos" aria-label="Casillas marcadas">
+        <li><span class="casilla" aria-hidden="true">✕</span> Revisión</li>
+        <li><span class="casilla" aria-hidden="true"></span> Urgente</li>
+        <li><span class="casilla" aria-hidden="true">✕</span> Avisar antes de cambiar</li>
+      </ul>
+      <div class="firma">
+        <svg viewBox="0 0 160 46" aria-hidden="true" class="garabato">
+          <path d="M6 32 C14 8 22 8 22 26 C22 40 30 12 38 14 C44 16 40 34 48 30 C58 24 60 10 66 18 C72 26 70 34 80 28 C92 20 100 26 112 22 C124 18 140 24 154 16" fill="none" stroke="var(--pluma)" stroke-width="2.4" stroke-linecap="round"></path>
+        </svg>
+        <span class="datos">Firma del cliente</span>
+      </div>
+      <SelloGiratorio class="sello-hero" />
+    </article>
+  </div>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    padding-block: clamp(1.25rem, 3vw, 2.5rem) clamp(3rem, 7vw, 6rem);
+  }
+
+  .marco {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: clamp(0.75rem, 2vw, 2rem);
+  }
+
+  .ubicacion {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.2rem 1.2rem;
+    color: var(--acero-oscuro);
+    margin-bottom: 0.6rem;
+  }
+
+  .ubicacion span + span::before {
+    content: '/';
+    margin-right: 1.2rem;
+    color: var(--oxido-oscuro);
+  }
+
+  .titular {
+    grid-column: 1 / -1;
+    position: relative;
+    z-index: 2;
+    margin: 0;
+    font-size: clamp(4.6rem, 19.5vw, 11rem);
+    line-height: 0.8;
+    letter-spacing: -0.012em;
+    color: var(--grasa);
+  }
+
+  .titular span {
+    display: block;
+    white-space: nowrap;
+  }
+
+  .titular .l3 {
+    color: var(--oxido);
+  }
+
+  .marco :global(.llave) {
+    position: absolute;
+    z-index: 1;
+    width: clamp(13rem, 52vw, 44rem);
+    right: -14%;
+    top: 3%;
+    rotate: 17deg;
+    color: var(--grasa);
+    opacity: 0.92;
+    pointer-events: none;
+  }
+
+  .texto {
+    grid-column: 1 / -1;
+    position: relative;
+    z-index: 3;
+    order: 3;
+    margin-top: 2rem;
+    max-width: 34rem;
+  }
+
+  .lema {
+    font-family: var(--font-datos);
+    font-weight: 700;
+    font-size: var(--text-mono-s);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 0.15rem 0.45rem;
+    display: inline;
+    background: var(--mostaza);
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+  }
+
+  .lead {
+    margin-top: 1rem;
+    font-size: var(--text-lead);
+    line-height: 1.45;
+  }
+
+  .acciones {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem 1.6rem;
+    margin-top: 1.6rem;
+  }
+
+  .secundario {
+    font-size: var(--text-mono-s);
+    font-weight: 700;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  /* ─── La orden pegada ─── */
+  .orden {
+    grid-column: 1 / -1;
+    order: 2;
+    position: relative;
+    z-index: 4;
+    justify-self: end;
+    width: min(100%, 23.5rem);
+    margin-top: 1.2rem;
+    margin-right: 0.4rem;
+    padding: 1rem 1.1rem 1.2rem;
+    rotate: 2deg;
+    box-shadow: var(--shadow-3);
+  }
+
+  .orden-cab {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.5rem;
+    padding-bottom: 0.45rem;
+    border-bottom: var(--borde);
+  }
+
+  .orden-cab .rotulo {
+    font-size: 1.45rem;
+    line-height: 1;
+  }
+
+  .folio {
+    color: var(--oxido-oscuro);
+    font-weight: 700;
+    font-size: 0.95rem;
+  }
+
+  .renglones {
+    margin: 0.6rem 0 0;
+    display: grid;
+    gap: 0.2rem;
+  }
+
+  .renglones div {
+    display: grid;
+    grid-template-columns: 3.6rem 1fr;
+    align-items: end;
+    border-bottom: 1.5px dashed rgb(20 18 15 / 0.55);
+    padding-bottom: 0.1rem;
+  }
+
+  .renglones dt {
+    font-family: var(--font-datos);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--acero);
+    padding-bottom: 0.25rem;
+  }
+
+  .renglones dd {
+    margin: 0;
+  }
+
+  .mano {
+    font-family: var(--font-plumon);
+    font-size: 1.45rem;
+    line-height: 1.15;
+    color: var(--pluma);
+  }
+
+  .falla dd {
+    font-size: 1.3rem;
+  }
+
+  .marcas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 0.9rem;
+    margin: 0.85rem 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .marcas li {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .marcas .casilla {
+    width: 1rem;
+    height: 1rem;
+    font-size: 0.72rem;
+    color: var(--pluma);
+  }
+
+  .firma {
+    margin-top: 0.8rem;
+    width: 62%;
+  }
+
+  .garabato {
+    height: 2.6rem;
+    width: 100%;
+    border-bottom: var(--borde);
+  }
+
+  .firma span {
+    font-size: 0.62rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--acero);
+  }
+
+  .orden :global(.sello-hero) {
+    position: absolute;
+    right: -2.2rem;
+    bottom: -2.6rem;
+    width: 8.4rem;
+  }
+
+  @media (min-width: 48rem) {
+    .titular {
+      font-size: clamp(6rem, 17vw, 19rem);
+    }
+
+    .titular .l3 {
+      /* se sale del contenedor por la derecha */
+      padding-left: 9vw;
+      font-size: 1.1em;
+      margin-right: -30vw;
+    }
+
+    .orden {
+      margin-top: -5.5rem;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .marco {
+      grid-template-rows: auto auto auto;
+    }
+
+    .titular {
+      grid-row: 2;
+    }
+
+    .texto {
+      grid-column: 1 / span 6;
+      grid-row: 3;
+      order: initial;
+    }
+
+    .orden {
+      grid-column: 8 / span 5;
+      grid-row: 2 / span 2;
+      align-self: end;
+      justify-self: start;
+      margin: 0 0 -1rem;
+      width: min(100%, 25rem);
+    }
+
+    .marco :global(.llave) {
+      right: auto;
+      left: 46%;
+      top: 18%;
+      width: min(44vw, 40rem);
+    }
+  }
+</style>

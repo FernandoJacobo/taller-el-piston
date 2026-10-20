@@ -130,14 +130,16 @@ Reglas: textura siempre por debajo del 20 % de opacidad; máximo **una** mancha 
 
 ## 6. Notas de plumón (máximo 8)
 
-1. Hero, sobre la hoja: "← el ruido viene de aquí".
+1. Hero: la hoja de orden llenada a mano (placa, falla, firma).
 2. Lista de precios: "incluye filtro ✓".
 3. Lista de precios: precio tachado corregido "ya bajó".
-4. Pizarrón: "Pruébalo con la placa JAL-482-C".
+4. Pizarrón: "Pruébalo con la placa JAL-482-C" (con filtro de gis).
 5. Equipo: "el Chato no presta su matraca".
-6. FAQ: "Pregunta lo que quieras. Aquí nadie se ríe."
-7. Talón de la orden: "Te contestamos en menos de 1 h".
+6. Notas de clientes: el único papelito escrito a mano.
+7. FAQ: "Pregunta lo que quieras. Aquí nadie se ríe."
 8. Cotizador: "estimado, no es factura".
+
+Lo llenado "con pluma" en formularios y talones usa IBM Plex Mono en tinta `--pluma` (#1F3A7A, azul de pluma de mostrador, 9.6:1 sobre papel), no el plumón.
 
 ## 7. Movimiento (solo estos)
 

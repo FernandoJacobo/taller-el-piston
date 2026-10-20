@@ -1,0 +1,257 @@
+---
+/**
+ * D · Pared con título vertical. La lista de precios atornillada a la pared,
+ * con los 10 que más salen, puntos guía, un tachón y dos notas de plumón.
+ */
+import { losMasPedidos, servicios } from '@/data/servicios';
+import { precioDesde } from '@/lib/cotizador';
+import { formatMXN } from '@/config/site';
+---
+
+<section id="precios" class="pared" aria-labelledby="pared-titulo">
+  <div class="contenedor rejilla">
+    <h2 id="pared-titulo" class="vertical">
+      <span>Precios</span>
+    </h2>
+
+    <div class="hoja lista doblez">
+      <span class="tornillo" style="left:0.7rem; top:0.7rem" aria-hidden="true"></span>
+      <span class="tornillo" style="right:0.7rem; top:0.7rem; rotate:40deg" aria-hidden="true"></span>
+      <span class="tornillo" style="left:0.7rem; bottom:0.7rem; rotate:75deg" aria-hidden="true"></span>
+
+      <header class="lista-cab">
+        <p class="rotulo">Los 10 que más salen</p>
+        <p class="datos nota-precios">Desde $ · MXN · Sin IVA · Auto compacto, refacción económica. El tuyo, en el cotizador.</p>
+      </header>
+
+      <ol class="filas">
+        {
+          losMasPedidos.map((s, i) => (
+            <li class="fila-precio">
+              <span class="pos datos">{String(i + 1).padStart(2, '0')}</span>
+              <a class="nombre" href={`/servicios#${s.id}`}>
+                {s.nombre}
+              </a>
+              <span class="guia" aria-hidden="true" />
+              {s.antes && (
+                <s class="antes datos">
+                  <span class="sr-only">Antes </span>
+                  {formatMXN(s.antes)}
+                </s>
+              )}
+              <span class="monto">
+                <span class="desde">desde </span>
+                {formatMXN(precioDesde(s))}
+              </span>
+              {s.antes && (
+                <span class="plumon nota-baja" style="--r:-7deg" aria-hidden="true">
+                  ya bajó
+                </span>
+              )}
+              {s.nota && (
+                <span class="plumon nota-filtro" style="--r:-4deg">
+                  {s.nota}
+                </span>
+              )}
+            </li>
+          ))
+        }
+      </ol>
+
+      <footer class="lista-pie">
+        <a class="btn btn--papel" href="/servicios">Lista completa · {servicios.length} servicios</a>
+        <a class="subrayado datos" href="/presupuesto">Cotizar el mío →</a>
+      </footer>
+    </div>
+  </div>
+</section>
+
+<style>
+  .pared {
+    position: relative;
+    padding-block: clamp(3rem, 7vw, 6rem);
+    background-color: #dccdaf;
+    background-image: var(--fibra), var(--grano);
+    border-block: var(--borde);
+  }
+
+  .rejilla {
+    display: grid;
+    gap: 1.25rem;
+  }
+
+  .vertical {
+    margin: 0;
+    font-size: var(--text-rotulo-l);
+    color: var(--oxido);
+    line-height: 0.8;
+  }
+
+  .vertical span {
+    display: inline-block;
+    padding: 0.08em 0.12em 0;
+    background: var(--grasa);
+    color: var(--mostaza);
+    rotate: -2deg;
+    box-shadow: var(--shadow-2);
+  }
+
+  .lista {
+    padding: clamp(1.6rem, 4vw, 3rem) clamp(1.1rem, 4vw, 3.2rem) clamp(1.6rem, 3vw, 2.4rem);
+    box-shadow: var(--shadow-3);
+    rotate: 0.5deg;
+  }
+
+  .tornillo {
+    position: absolute;
+    width: 0.9rem;
+    height: 0.9rem;
+    border-radius: var(--radius-full);
+    border: 2px solid var(--grasa);
+    background: linear-gradient(var(--grasa), var(--grasa)) center / 100% 2px no-repeat, #b9b2a2;
+  }
+
+  .lista-cab {
+    display: grid;
+    gap: 0.5rem;
+    padding-bottom: 1rem;
+    margin-bottom: 0.5rem;
+    border-bottom: 4px double var(--grasa);
+  }
+
+  .lista-cab .rotulo {
+    font-size: var(--text-rotulo-s);
+  }
+
+  .nota-precios {
+    font-size: var(--text-mono-xs);
+    color: var(--acero);
+    max-width: 36rem;
+  }
+
+  .filas {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .fila-precio {
+    position: relative;
+    flex-wrap: wrap;
+    padding: 0.65rem 0 0.55rem;
+    border-bottom: 1.5px solid rgb(20 18 15 / 0.18);
+    row-gap: 0;
+  }
+
+  .pos {
+    width: 1.8rem;
+    font-size: var(--text-mono-xs);
+    color: var(--acero);
+    font-weight: 700;
+  }
+
+  .nombre {
+    font-weight: 600;
+    font-size: 1.05rem;
+    text-decoration: none;
+  }
+
+  .nombre:hover {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+  }
+
+  .monto {
+    font-size: 1.05rem;
+  }
+
+  .desde {
+    font-weight: 400;
+    font-size: 0.75rem;
+    color: var(--acero);
+  }
+
+  .antes {
+    font-size: 0.85rem;
+    color: var(--acero);
+    text-decoration-thickness: 2px;
+    text-decoration-color: var(--oxido-oscuro);
+  }
+
+  .nota-baja {
+    position: absolute;
+    right: -0.6rem;
+    top: -0.9rem;
+    font-size: 1.25rem;
+  }
+
+  .nota-filtro {
+    flex-basis: 100%;
+    padding-left: 1.8rem;
+    font-size: 1.3rem;
+    margin-top: 0.1rem;
+  }
+
+  .lista-pie {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem 1.6rem;
+    margin-top: 1.6rem;
+  }
+
+  .lista-pie .subrayado {
+    font-weight: 700;
+    font-size: var(--text-mono-s);
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  @media (max-width: 30rem) {
+    .fila-precio .guia {
+      display: none;
+    }
+
+    .fila-precio .nombre {
+      flex: 1 1 60%;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .rejilla {
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: clamp(1.5rem, 4vw, 4rem);
+      align-items: start;
+    }
+
+    .vertical {
+      writing-mode: vertical-rl;
+      rotate: 180deg;
+      font-size: clamp(7rem, 12vw, 12rem);
+      position: sticky;
+      top: 2rem;
+      align-self: start;
+    }
+
+    .vertical span {
+      rotate: 0deg;
+      padding: 0.12em 0.02em;
+    }
+
+    .lista {
+      margin-right: 6%;
+      margin-top: 3rem;
+    }
+
+    .filas {
+      columns: 2;
+      column-gap: 3rem;
+      column-rule: 2px dashed rgb(20 18 15 / 0.3);
+    }
+
+    .fila-precio {
+      break-inside: avoid;
+    }
+  }
+</style>

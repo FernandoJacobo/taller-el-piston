@@ -1,0 +1,455 @@
+---
+/**
+ * J · La orden de servicio que el cliente llena: hoja con talón desprendible.
+ * Valida con src/lib/orden.ts y abre WhatsApp con el mensaje formateado (o correo).
+ * Se usa en el inicio y en /contacto.
+ */
+import { site } from '@/config/site';
+import { horarios } from '@/lib/orden';
+
+interface Props {
+  /** Título grande de la hoja */
+  titulo?: string;
+}
+const { titulo = 'Orden de servicio' } = Astro.props;
+const anio = new Date().getFullYear();
+---
+
+<section id="orden" class="orden-sec" aria-labelledby="orden-titulo">
+  <div class="contenedor">
+    <div class="hoja pliego">
+      <form class="formulario" novalidate data-orden>
+        <header class="cab">
+          <h2 id="orden-titulo" class="titulo">{titulo}</h2>
+          <p class="datos folio">N.º <span data-folio>—</span></p>
+          <p class="instruccion">
+            Llénala como en el mostrador. Al firmar se abre WhatsApp con tu orden lista; nos llega a nosotros, no a un robot.
+          </p>
+        </header>
+
+        <div class="campos">
+          <div class="campo c-placa">
+            <label for="o-placa">Placa</label>
+            <input id="o-placa" name="placa" autocomplete="off" autocapitalize="characters" placeholder="JAL-000-A" required aria-describedby="e-placa" />
+            <span class="error" id="e-placa" aria-live="polite"></span>
+          </div>
+          <div class="campo c-marca">
+            <label for="o-marca">Marca</label>
+            <input id="o-marca" name="marca" autocomplete="off" required aria-describedby="e-marca" />
+            <span class="error" id="e-marca" aria-live="polite"></span>
+          </div>
+          <div class="campo c-modelo">
+            <label for="o-modelo">Modelo</label>
+            <input id="o-modelo" name="modelo" autocomplete="off" required aria-describedby="e-modelo" />
+            <span class="error" id="e-modelo" aria-live="polite"></span>
+          </div>
+          <div class="campo c-anio">
+            <label for="o-anio">Año</label>
+            <input id="o-anio" name="anio" inputmode="numeric" maxlength="4" placeholder={String(anio - 8)} required aria-describedby="e-anio" />
+            <span class="error" id="e-anio" aria-live="polite"></span>
+          </div>
+          <div class="campo c-km">
+            <label for="o-km">Kilometraje <span class="opc">(si lo sabes)</span></label>
+            <input id="o-km" name="km" inputmode="numeric" placeholder="120000" aria-describedby="e-km" />
+            <span class="error" id="e-km" aria-live="polite"></span>
+          </div>
+          <div class="campo c-falla">
+            <label for="o-falla">Falla · qué hace, cuándo y desde cuándo</label>
+            <textarea id="o-falla" name="falla" rows="3" required aria-describedby="e-falla"></textarea>
+            <span class="error" id="e-falla" aria-live="polite"></span>
+          </div>
+
+          <fieldset class="campo c-horario" aria-describedby="e-horario">
+            <legend class="campo-label">Horario preferido para traerlo</legend>
+            <div class="opciones">
+              {
+                horarios.map((h, i) => (
+                  <label class="opcion">
+                    <input type="radio" class="casilla-input" name="horario" value={h} checked={i === horarios.length - 1} />
+                    <span class="datos">{h}</span>
+                  </label>
+                ))
+              }
+            </div>
+            <span class="error" id="e-horario" aria-live="polite"></span>
+          </fieldset>
+
+          <div class="campo c-nombre firma">
+            <label for="o-nombre">Firma (tu nombre)</label>
+            <input id="o-nombre" name="nombre" autocomplete="name" required aria-describedby="e-nombre" />
+            <span class="error" id="e-nombre" aria-live="polite"></span>
+          </div>
+          <div class="campo c-tel">
+            <label for="o-tel">Teléfono (10 dígitos)</label>
+            <input id="o-tel" name="telefono" type="tel" autocomplete="tel-national" inputmode="tel" required aria-describedby="e-telefono" />
+            <span class="error" id="e-telefono" aria-live="polite"></span>
+          </div>
+        </div>
+
+        <div class="enviar">
+          <button class="btn" type="submit">Firmar y mandar por WhatsApp</button>
+          <a class="subrayado datos" href={`mailto:${site.contact.email}`} data-mailto>o mándala por correo</a>
+        </div>
+        <p class="resumen datos" role="status" data-resumen></p>
+      </form>
+
+      <div class="perforado-v corte" aria-hidden="true"></div>
+
+      <aside class="talon" aria-label="Talón del cliente">
+        <p class="etiqueta">Talón del cliente</p>
+        <p class="datos folio-talon">N.º <span data-folio>—</span></p>
+        <dl class="datos">
+          <div><dt>Recibe</dt><dd>Mostrador</dd></div>
+          <div><dt>Respuesta</dt><dd>En menos de 1 h en horario</dd></div>
+          <div><dt>Revisión</dt><dd>Sin costo si se repara aquí</dd></div>
+        </dl>
+        <p class="sello sello--oscuro conserve" style="--r:-6deg">Conserve<br />este talón</p>
+        <p class="datos tel">{site.contact.phoneDisplay}</p>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { folioDelMomento, mensajeOrden, validarOrden, type DatosOrden } from '@/lib/orden';
+  import { mailtoUrl, whatsappUrl } from '@/config/site';
+
+  const form = document.querySelector<HTMLFormElement>('[data-orden]');
+  if (form) {
+    const folio = folioDelMomento();
+    document.querySelectorAll('[data-folio]').forEach((el) => (el.textContent = folio));
+
+    // Prellenado desde el diagnóstico de otra página: /contacto?falla=…
+    const falla = new URLSearchParams(location.search).get('falla');
+    if (falla) (form.elements.namedItem('falla') as HTMLTextAreaElement).value = falla;
+
+    const leer = (): DatosOrden => {
+      const f = new FormData(form);
+      const v = (k: string) => String(f.get(k) ?? '');
+      return {
+        placa: v('placa'),
+        marca: v('marca'),
+        modelo: v('modelo'),
+        anio: v('anio'),
+        km: v('km'),
+        falla: v('falla'),
+        horario: v('horario'),
+        nombre: v('nombre'),
+        telefono: v('telefono'),
+      };
+    };
+
+    const pintarErrores = (errores: Partial<Record<keyof DatosOrden, string>>) => {
+      form.querySelectorAll<HTMLElement>('.campo').forEach((c) => {
+        const control = c.querySelector<HTMLInputElement>('input, textarea');
+        const nombre = (control?.name ?? '') as keyof DatosOrden;
+        const msg = errores[nombre];
+        const salida = c.querySelector('.error');
+        if (salida) salida.textContent = msg ?? '';
+        if (msg) {
+          c.dataset.error = '';
+          control?.setAttribute('aria-invalid', 'true');
+        } else {
+          delete c.dataset.error;
+          control?.removeAttribute('aria-invalid');
+        }
+      });
+    };
+
+    let intentado = false;
+    form.addEventListener('input', () => intentado && pintarErrores(validarOrden(leer())));
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      intentado = true;
+      const datos = leer();
+      const errores = validarOrden(datos);
+      pintarErrores(errores);
+      const resumen = form.querySelector('[data-resumen]')!;
+      const faltan = Object.keys(errores).length;
+      if (faltan) {
+        resumen.textContent = `Faltan ${faltan} ${faltan === 1 ? 'dato' : 'datos'} en la orden.`;
+        form.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
+        return;
+      }
+      resumen.textContent = 'Abriendo WhatsApp con tu orden…';
+      window.open(whatsappUrl(mensajeOrden(datos, folio)), '_blank', 'noopener');
+    });
+
+    form.querySelector<HTMLAnchorElement>('[data-mailto]')?.addEventListener('click', (e) => {
+      const datos = leer();
+      const errores = validarOrden(datos);
+      if (Object.keys(errores).length) {
+        e.preventDefault();
+        intentado = true;
+        pintarErrores(errores);
+        form.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
+        return;
+      }
+      (e.currentTarget as HTMLAnchorElement).href = mailtoUrl(`Orden de servicio N.º ${folio} · ${datos.placa.toUpperCase()}`, mensajeOrden(datos, folio).replaceAll('*', ''));
+    });
+  }
+</script>
+
+<style>
+  .orden-sec {
+    padding-block: clamp(3rem, 7vw, 6rem) clamp(4rem, 8vw, 6rem);
+    scroll-margin-top: 0.5rem;
+  }
+
+  .pliego {
+    display: grid;
+    box-shadow: var(--shadow-3);
+    rotate: -0.4deg;
+  }
+
+  .formulario {
+    padding: clamp(1.2rem, 4vw, 3rem);
+    min-width: 0;
+  }
+
+  .cab {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.4rem 1rem;
+    align-items: end;
+    padding-bottom: 1rem;
+    border-bottom: 4px double var(--grasa);
+  }
+
+  .titulo {
+    font-size: var(--text-rotulo-m);
+  }
+
+  .folio {
+    color: var(--oxido-oscuro);
+    font-weight: 700;
+    font-size: 1.2rem;
+  }
+
+  .instruccion {
+    grid-column: 1 / -1;
+    max-width: 36rem;
+    font-size: 0.95rem;
+    color: var(--acero);
+  }
+
+  .campos {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 1.1rem 1.2rem;
+    margin-top: 1.4rem;
+  }
+
+  :where(.campos > *) {
+    grid-column: 1 / -1;
+  }
+
+  .c-marca,
+  .c-modelo {
+    grid-column: span 3;
+  }
+
+  .c-anio {
+    grid-column: span 2;
+  }
+
+  .c-km {
+    grid-column: span 4;
+  }
+
+  .opc {
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    text-transform: none;
+  }
+
+  fieldset.campo {
+    border: 0;
+    margin: 0;
+    padding: 0;
+    min-width: 0;
+  }
+
+  .opciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem 1.2rem;
+    margin-top: 0.4rem;
+  }
+
+  .opcion {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 44px;
+    cursor: pointer;
+    font-size: var(--text-mono-s);
+  }
+
+  .firma input {
+    font-size: 1.3rem;
+    border-bottom-style: solid;
+  }
+
+  .enviar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem 1.6rem;
+    margin-top: 1.8rem;
+  }
+
+  .enviar .subrayado {
+    font-size: var(--text-mono-s);
+    font-weight: 700;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .resumen {
+    margin-top: 0.8rem;
+    font-size: var(--text-mono-s);
+    color: var(--oxido-oscuro);
+    font-weight: 700;
+    min-height: 1.4em;
+  }
+
+  .corte {
+    width: auto;
+    height: 14px;
+    background-image: radial-gradient(circle, var(--kraft) 0 4px, transparent 4.5px);
+    background-size: 14px 14px;
+    background-repeat: repeat-x;
+    border-top: 2px dashed var(--grasa);
+  }
+
+  .talon {
+    position: relative;
+    display: grid;
+    gap: 0.8rem;
+    align-content: start;
+    padding: 1.4rem clamp(1.2rem, 3vw, 1.8rem) 1.8rem;
+    background-color: #efe6d1;
+  }
+
+  .talon .etiqueta {
+    color: var(--acero);
+  }
+
+  .folio-talon {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--oxido-oscuro);
+    line-height: 1;
+  }
+
+  .talon dl {
+    margin: 0;
+    display: grid;
+    gap: 0.4rem;
+    font-size: var(--text-mono-xs);
+  }
+
+  .talon dt {
+    color: var(--acero);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 0.62rem;
+  }
+
+  .talon dd {
+    margin: 0;
+    font-weight: 700;
+  }
+
+  .conserve {
+    justify-self: start;
+    font-size: 1.35rem;
+    margin-top: 0.4rem;
+  }
+
+  .tel {
+    font-size: var(--text-mono-s);
+    font-weight: 700;
+  }
+
+  @media (max-width: 63.99rem) {
+    /* El talón pasa arriba como tira perforada */
+    .talon {
+      order: -2;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+    }
+
+    .corte {
+      order: -1;
+    }
+
+    .talon .etiqueta {
+      grid-column: 1 / -1;
+    }
+
+    .talon dl,
+    .tel {
+      display: none;
+    }
+
+    .conserve {
+      grid-column: 3;
+      grid-row: 2;
+      margin: 0;
+      font-size: 1rem;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .pliego {
+      grid-template-columns: minmax(0, 1fr) 14px 17rem;
+      margin-right: 4%;
+    }
+
+    .corte {
+      width: 14px;
+      height: auto;
+      background-repeat: repeat-y;
+      border-top: 0;
+      border-left: 2px dashed var(--grasa);
+    }
+
+    .campos {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+    }
+
+    .c-placa {
+      grid-column: span 3;
+    }
+    .c-marca {
+      grid-column: span 3;
+    }
+    .c-modelo {
+      grid-column: span 3;
+    }
+    .c-anio {
+      grid-column: span 3;
+    }
+    .c-km {
+      grid-column: span 4;
+    }
+    .c-falla {
+      grid-column: span 8;
+    }
+    .c-nombre {
+      grid-column: span 7;
+    }
+    .c-tel {
+      grid-column: span 5;
+    }
+
+    .talon {
+      rotate: 1.2deg;
+      translate: 0.6rem 0;
+    }
+  }
+</style>

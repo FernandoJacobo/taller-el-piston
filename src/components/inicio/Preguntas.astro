@@ -1,0 +1,151 @@
+---
+/**
+ * I · Columna angosta de casillas. <details> nativo: teclado, aria-expanded y lector
+ * de pantalla sin JS. La casilla pasa de ☐ a ☒ al abrir.
+ */
+import { preguntas } from '@/data/preguntas';
+import Ilustracion from '@/components/ui/Ilustracion.astro';
+---
+
+<section class="faq" aria-labelledby="faq-titulo">
+  <div class="contenedor rejilla">
+    <div class="columna">
+      <p class="etiqueta">Hoja 6 · Dudas del cliente</p>
+      <h2 id="faq-titulo" class="titulo">Preguntas que sí nos hacen</h2>
+      <div class="lista">
+        {
+          preguntas.map((q, i) => (
+            <details name="faq">
+              <summary>
+                <span class="casilla" aria-hidden="true" />
+                <span class="datos n">{String(i + 1).padStart(2, '0')}</span>
+                <span class="p">{q.p}</span>
+              </summary>
+              <p class="r">{q.r}</p>
+            </details>
+          ))
+        }
+      </div>
+    </div>
+
+    <aside class="margen" aria-label="Nota">
+      <p class="plumon nota" style="--r:-5deg">Pregunta lo que quieras. Aquí nadie se ríe.</p>
+      <Ilustracion nombre="flecha" class="flecha" trazo={3.2} />
+    </aside>
+  </div>
+</section>
+
+<style>
+  .faq {
+    padding-block: clamp(3.5rem, 8vw, 6.5rem);
+  }
+
+  .rejilla {
+    display: grid;
+    gap: 2rem;
+  }
+
+  .etiqueta {
+    color: var(--oxido-oscuro);
+  }
+
+  .titulo {
+    font-size: var(--text-rotulo-m);
+    margin: 0.4rem 0 1.6rem;
+    max-width: 12ch;
+  }
+
+  .lista {
+    border-top: var(--borde);
+  }
+
+  details {
+    border-bottom: 2px solid var(--grasa);
+  }
+
+  summary {
+    display: grid;
+    grid-template-columns: auto auto 1fr;
+    gap: 0.75rem;
+    align-items: baseline;
+    min-height: 3.2rem;
+    padding: 0.8rem 0.2rem;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  summary::-webkit-details-marker {
+    display: none;
+  }
+
+  summary .casilla {
+    translate: 0 0.2rem;
+    color: var(--oxido-oscuro);
+  }
+
+  details[open] summary .casilla::before {
+    content: '✕';
+  }
+
+  .n {
+    font-size: var(--text-mono-xs);
+    color: var(--acero-oscuro);
+    font-weight: 700;
+  }
+
+  .p {
+    font-weight: 600;
+    font-size: 1.08rem;
+    line-height: 1.3;
+  }
+
+  summary:hover .p {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.2em;
+  }
+
+  .r {
+    padding: 0 0.4rem 1.1rem 4.1rem;
+    max-width: 38rem;
+    line-height: 1.55;
+  }
+
+  .margen {
+    position: relative;
+  }
+
+  .nota {
+    font-size: clamp(1.6rem, 1.2rem + 1.4vw, 2.4rem);
+    max-width: 16rem;
+  }
+
+  .margen :global(.flecha) {
+    display: none;
+  }
+
+  @media (min-width: 64rem) {
+    .rejilla {
+      grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+      gap: 4rem;
+    }
+
+    .columna {
+      max-width: 44rem;
+    }
+
+    .margen {
+      padding-top: 16rem;
+      padding-left: 3rem;
+    }
+
+    .margen :global(.flecha) {
+      display: block;
+      width: 7rem;
+      scale: -1 1;
+      rotate: 12deg;
+      margin-top: 0.6rem;
+      color: var(--oxido-oscuro);
+    }
+  }
+</style>

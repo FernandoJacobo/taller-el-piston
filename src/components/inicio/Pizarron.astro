@@ -1,0 +1,244 @@
+---
+/**
+ * E · Sangrado oscuro con columnas a gis. Las tiras magnéticas son las órdenes demo
+ * reales de /seguimiento, cada una en la columna de su estado.
+ */
+import { site } from '@/config/site';
+import { estados, ordenesDemo } from '@/data/ordenes';
+import Odometro from '@/components/ui/Odometro.astro';
+
+const colores = ['mostaza', 'papel', 'oxido', 'papel'];
+const demo = ordenesDemo[0];
+---
+
+<section class="tablero pizarron" aria-labelledby="pizarron-titulo">
+  <div class="contenedor">
+    <div class="cabeza">
+      <div class="odo">
+        <Odometro valor={site.autosRevisados} digitos={String(site.autosRevisados).length} etiqueta={`autos revisados desde ${site.foundingYear}`} />
+        <p class="datos odo-pie">autos revisados desde {site.foundingYear}. Sí, los contamos.</p>
+      </div>
+      <div class="titulo-bloque">
+        <h2 id="pizarron-titulo" class="titulo">Así va tu auto</h2>
+        <p class="intro">
+          Lo que antes veías en el pizarrón del taller, ahora lo ves desde tu celular: en qué paso va, qué encontró el mecánico, cuánto cuesta y cuándo sale. Autorizas con un botón.
+        </p>
+      </div>
+    </div>
+
+    <ol class="columnas" aria-label="Pasos de una orden de servicio">
+      {
+        estados.map((e, i) => {
+          const aqui = ordenesDemo.filter((o) => o.estado === e.id);
+          return (
+            <li class="columna">
+              <h3 class="col-titulo">
+                <span class="datos n">{i + 1}</span>
+                {e.corto}
+              </h3>
+              <ul class="imanes">
+                {aqui.map((o) => (
+                  <li class:list={['iman', `iman--${colores[ordenesDemo.indexOf(o)]}`]} style={`--r:${[-2, 1.5, -1, 2.5][ordenesDemo.indexOf(o)]}deg`}>
+                    <span class="datos placa">{o.placa}</span>
+                    <span class="datos quien">{o.mecanico}</span>
+                  </li>
+                ))}
+              </ul>
+            </li>
+          );
+        })
+      }
+    </ol>
+
+    <div class="invitacion">
+      <p class="gis nota">Pruébalo con la placa {demo.placa}</p>
+      <a class="btn" href={`/seguimiento?placa=${demo.placa}`}>Ver cómo va mi auto</a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .tablero {
+    position: relative;
+    padding-block: clamp(3.5rem, 8vw, 6.5rem);
+    border-block: 10px solid #5b4632;
+    box-shadow:
+      inset 0 0 0 2px #2c241b,
+      inset 0 0 80px rgb(0 0 0 / 0.55);
+  }
+
+  .cabeza {
+    display: grid;
+    gap: 2rem;
+  }
+
+  .odo :global(.odometro) {
+    font-size: clamp(2.6rem, 1.6rem + 4vw, 4.6rem);
+  }
+
+  .odo-pie {
+    margin-top: 0.7rem;
+    font-size: var(--text-mono-xs);
+    color: rgb(237 232 218 / 0.75);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .titulo {
+    font-size: var(--text-rotulo-l);
+    color: var(--gis);
+    filter: url(#trazo-gis);
+  }
+
+  .intro {
+    margin-top: 1rem;
+    max-width: 30rem;
+    color: rgb(237 232 218 / 0.9);
+  }
+
+  .columnas {
+    list-style: none;
+    margin: 3rem 0 0;
+    padding: 0;
+    display: grid;
+    border-top: 2px solid rgb(237 232 218 / 0.5);
+  }
+
+  .columna {
+    display: grid;
+    grid-template-columns: 9.5rem 1fr;
+    align-items: center;
+    min-height: 4.2rem;
+    border-bottom: 2px solid rgb(237 232 218 / 0.35);
+    padding: 0.5rem 0;
+  }
+
+  .col-titulo {
+    font-size: 1.45rem;
+    color: var(--gis);
+    filter: url(#trazo-gis);
+    display: flex;
+    gap: 0.5rem;
+    align-items: baseline;
+  }
+
+  .n {
+    font-size: 0.8rem;
+    color: var(--mostaza);
+  }
+
+  .imanes {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+
+  .iman {
+    display: grid;
+    padding: 0.3rem 0.6rem 0.25rem;
+    border: 2px solid #000;
+    color: var(--grasa);
+    rotate: var(--r);
+    box-shadow: 3px 3px 0 rgb(0 0 0 / 0.6);
+    line-height: 1.2;
+  }
+
+  .iman--mostaza {
+    background: var(--mostaza);
+  }
+
+  .iman--papel {
+    background: var(--papel);
+  }
+
+  .iman--oxido {
+    background: var(--oxido-oscuro);
+    color: var(--papel);
+  }
+
+  .placa {
+    font-weight: 700;
+    font-size: 0.95rem;
+    letter-spacing: 0.04em;
+  }
+
+  .quien {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .invitacion {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 1rem 2rem;
+    margin-top: 2.5rem;
+  }
+
+  .nota {
+    font-size: clamp(1.6rem, 1.2rem + 1.5vw, 2.4rem);
+    rotate: -3deg;
+  }
+
+  .invitacion .btn {
+    box-shadow: 4px 4px 0 #000;
+  }
+
+  @media (min-width: 64rem) {
+    .cabeza {
+      grid-template-columns: auto 1fr;
+      align-items: end;
+      gap: 3rem 5rem;
+    }
+
+    .titulo-bloque {
+      justify-self: end;
+      text-align: right;
+    }
+
+    .intro {
+      margin-left: auto;
+    }
+
+    .columnas {
+      grid-template-columns: repeat(5, 1fr);
+      border-top: 0;
+      margin-top: 3.5rem;
+    }
+
+    .columna {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 1rem;
+      min-height: 14rem;
+      padding: 0 1rem;
+      border-bottom: 0;
+      border-left: 2px solid rgb(237 232 218 / 0.35);
+    }
+
+    .columna:last-child {
+      border-right: 2px solid rgb(237 232 218 / 0.35);
+    }
+
+    .col-titulo {
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid rgb(237 232 218 / 0.5);
+    }
+
+    .imanes {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .invitacion {
+      margin-top: 1.5rem;
+      margin-right: 6%;
+    }
+  }
+</style>

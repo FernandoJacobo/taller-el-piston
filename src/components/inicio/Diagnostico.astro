@@ -1,0 +1,473 @@
+---
+/**
+ * C · Índice + expediente. Lista tipográfica de síntomas (radios nativos: teclado y lector
+ * de pantalla gratis) y un expediente de papel por síntoma, calculado en el build con
+ * src/lib/diagnostico.ts. CSS :has() muestra el elegido; el JS solo prellena la orden.
+ */
+import { sintomas } from '@/data/sintomas';
+import { servicios } from '@/data/servicios';
+import { diagnosticar, fallaParaOrden } from '@/lib/diagnostico';
+import { formatMXN } from '@/config/site';
+import Medidor from '@/components/ui/Medidor.astro';
+
+const resultados = sintomas.map((s) => diagnosticar(s, servicios));
+const barras = { alta: '■■■', media: '■■□', baja: '■□□' } as const;
+const css = sintomas
+  .map((s) => `.diag:has(#sin-${s.id}:checked) [data-exp='${s.id}']`)
+  .join(',\n');
+---
+
+<section id="diagnostico" class="diag" aria-labelledby="diag-titulo">
+  <div class="contenedor rejilla">
+    <header class="cabeza">
+      <div>
+        <p class="etiqueta">Hoja 2 · Diagnóstico por síntoma</p>
+        <h2 id="diag-titulo" class="titulo">¿Qué le suena a tu carro?</h2>
+      </div>
+      <p class="intro">Elige lo que le pasa. Te decimos qué suele ser, qué tan urgente es y cuánto cuesta más o menos. Sin rodeos.</p>
+    </header>
+
+    <fieldset class="indice">
+      <legend class="sr-only">Síntoma de tu auto</legend>
+      <ol>
+        {
+          sintomas.map((s, i) => (
+            <li>
+              <input type="radio" name="sintoma" id={`sin-${s.id}`} value={s.id} class="sr-only" />
+              <label for={`sin-${s.id}`}>
+                <span class="num datos">{String(i + 1).padStart(2, '0')}</span>
+                <span class="nombre">{s.nombre}</span>
+              </label>
+            </li>
+          ))
+        }
+      </ol>
+    </fieldset>
+
+    <div class="expedientes" id="expediente" aria-live="polite">
+      <div class="hoja expediente vacio" data-vacio>
+        <p class="etiqueta">Expediente</p>
+        <p class="vacio-texto">Elige un síntoma de la lista.<br />Aquí aparece lo que encontramos.</p>
+        <Medidor nivel={null} />
+      </div>
+
+      {
+        resultados.map((r) => (
+          <article class="hoja expediente" data-exp={r.sintoma.id} aria-labelledby={`exp-${r.sintoma.id}`}>
+            <span class="grapa" style="--r:-6deg; left: 1.2rem; top: -0.35rem" />
+            <header class="exp-cab">
+              <p class="etiqueta">Expediente · síntoma</p>
+              <h3 id={`exp-${r.sintoma.id}`}>{r.sintoma.nombre}</h3>
+            </header>
+
+            <div class="exp-cuerpo">
+              <div class="semaforo" data-nivel={r.urgencia.nivel}>
+                <Medidor nivel={r.urgencia.nivel} />
+                <p class="veredicto">
+                  <strong class="datos">{r.urgencia.corto}: {r.urgencia.etiqueta}</strong>
+                  {r.sintoma.veredicto}
+                </p>
+              </div>
+
+              <div class="bloque">
+                <h4 class="etiqueta">Causas probables, de más a menos</h4>
+                <ol class="causas">
+                  {r.causas.map((c) => (
+                    <li>
+                      <span class="prob datos" aria-label={`Probabilidad ${c.probabilidad}`}>
+                        <span aria-hidden="true">{barras[c.probabilidad]}</span>
+                      </span>
+                      <span>
+                        <strong>{c.causa}</strong>
+                        <span class="porque">{c.porque}</span>
+                      </span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+
+              <div class="bloque">
+                <h4 class="etiqueta">Lo que puedes revisar tú</h4>
+                <ul class="revisa">
+                  {r.sintoma.revisaTu.map((t) => (
+                    <li>
+                      <span class="casilla" aria-hidden="true" />
+                      {t}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div class="bloque pie-exp">
+                <p class="datos relacionado">
+                  Servicio relacionado:{' '}
+                  {r.servicios.slice(0, 2).map((s, i) => (
+                    <>
+                      {i > 0 && ' · '}
+                      <a class="subrayado" href={`/servicios#${s.id}`}>
+                        {s.nombre}
+                      </a>
+                    </>
+                  ))}
+                </p>
+                {r.rango && (
+                  <p class="rango">
+                    <span class="etiqueta">Rango orientativo</span>
+                    <span class="datos monto">
+                      {formatMXN(r.rango.min)} – {formatMXN(r.rango.max)}
+                    </span>
+                  </p>
+                )}
+                <a class="btn btn--tinta llevar" href="#orden" data-falla={fallaParaOrden(r)}>
+                  Llevarlo a revisión
+                </a>
+              </div>
+            </div>
+            <p class="aviso datos">Orientativo. No sustituye la revisión: el auto se revisa en el taller antes de cobrar un peso.</p>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<Fragment set:html={`<style>${css} { display: block; } .diag:has(.indice input:checked) [data-vacio] { display: none; }</style>`} />
+
+<script>
+  const seccion = document.querySelector('#diagnostico');
+  // En móvil, al elegir un síntoma se baja al expediente
+  seccion?.addEventListener('change', (e) => {
+    if (!(e.target instanceof HTMLInputElement) || !matchMedia('(max-width: 63.99rem)').matches) return;
+    document.querySelector('#expediente')?.scrollIntoView({ block: 'start' });
+  });
+  // "Llevarlo a revisión": prellena la falla de la orden de esta página o la de /contacto
+  seccion?.addEventListener('click', (e) => {
+    const a = (e.target as HTMLElement).closest<HTMLAnchorElement>('[data-falla]');
+    if (!a) return;
+    const falla = a.dataset.falla ?? '';
+    const campo = document.querySelector<HTMLTextAreaElement>('#orden textarea[name="falla"]');
+    if (campo) {
+      campo.value = falla;
+      campo.dispatchEvent(new Event('input', { bubbles: true }));
+      setTimeout(() => document.querySelector<HTMLInputElement>('#orden input[name="placa"]')?.focus({ preventScroll: true }), 450);
+    } else {
+      e.preventDefault();
+      location.href = `/contacto?falla=${encodeURIComponent(falla)}#orden`;
+    }
+  });
+</script>
+
+<style>
+  .diag {
+    position: relative;
+    padding-block: clamp(3.5rem, 8vw, 7rem) clamp(3rem, 6vw, 5rem);
+  }
+
+  .rejilla {
+    display: grid;
+    gap: 1.5rem;
+  }
+
+  .cabeza .etiqueta {
+    color: var(--oxido-oscuro);
+  }
+
+  .titulo {
+    font-size: var(--text-rotulo-l);
+    margin-top: 0.4rem;
+    max-width: 14ch;
+  }
+
+  .intro {
+    margin-top: 1rem;
+    max-width: 30rem;
+    font-size: var(--text-lead);
+  }
+
+  /* ─── Índice ─── */
+  .indice {
+    border: 0;
+    margin: 0;
+    padding: 0;
+    min-width: 0;
+  }
+
+  .indice ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .indice label {
+    display: flex;
+    align-items: baseline;
+    gap: 0.9rem;
+    cursor: pointer;
+    min-height: 44px;
+    padding: 0.35rem 0.4rem 0.25rem 0;
+    border-bottom: 2px solid var(--grasa);
+    transition: padding 0.15s;
+  }
+
+  .num {
+    font-size: var(--text-mono-s);
+    font-weight: 700;
+    color: var(--acero-oscuro);
+    width: 1.6rem;
+    flex: none;
+  }
+
+  .nombre {
+    font-family: var(--font-rotulo);
+    font-weight: 900;
+    text-transform: uppercase;
+    font-size: clamp(1.7rem, 1.1rem + 2.2vw, 3rem);
+    line-height: 0.95;
+  }
+
+  .indice label:hover .nombre {
+    color: var(--oxido-oscuro);
+  }
+
+  .indice input:checked + label {
+    background: var(--grasa);
+    color: var(--papel);
+    padding-left: 0.6rem;
+  }
+
+  .indice input:checked + label .num {
+    color: var(--mostaza);
+  }
+
+  .indice input:checked + label .nombre::after {
+    content: ' →';
+    color: var(--mostaza);
+  }
+
+  .indice input:focus-visible + label {
+    outline: 3px solid var(--oxido-oscuro);
+    outline-offset: 2px;
+  }
+
+  /* ─── Expediente ─── */
+  .expedientes {
+    scroll-margin-top: 1rem;
+  }
+
+  .expediente {
+    display: none;
+    padding: 1.4rem clamp(1rem, 3vw, 2rem) 1.2rem;
+    rotate: -0.6deg;
+    box-shadow: var(--shadow-3);
+  }
+
+  .vacio {
+    display: grid;
+    gap: 1rem;
+    justify-items: start;
+    rotate: 0.8deg;
+  }
+
+  .vacio-texto {
+    font-family: var(--font-datos);
+    font-size: var(--text-mono-s);
+    color: var(--acero);
+  }
+
+  .vacio :global(.medidor) {
+    width: 11rem;
+    opacity: 0.6;
+  }
+
+  .exp-cab {
+    border-bottom: var(--borde);
+    padding-bottom: 0.6rem;
+  }
+
+  .exp-cab .etiqueta {
+    color: var(--acero);
+  }
+
+  .exp-cab h3 {
+    font-size: var(--text-rotulo-m);
+    margin-top: 0.2rem;
+  }
+
+  .exp-cuerpo {
+    display: grid;
+    gap: 1.2rem;
+    margin-top: 1rem;
+  }
+
+  .semaforo {
+    display: grid;
+    grid-template-columns: minmax(7.5rem, 10rem) 1fr;
+    gap: 1rem;
+    align-items: center;
+  }
+
+  .veredicto {
+    font-size: 1.02rem;
+  }
+
+  .veredicto strong {
+    display: block;
+    font-size: var(--text-mono-s);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.2rem;
+  }
+
+  .semaforo[data-nivel='rojo'] .veredicto strong {
+    color: var(--oxido-oscuro);
+  }
+
+  .bloque h4 {
+    color: var(--acero);
+    margin-bottom: 0.5rem;
+  }
+
+  .causas,
+  .revisa {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.55rem;
+  }
+
+  .causas li {
+    display: grid;
+    grid-template-columns: 2.6rem 1fr;
+    gap: 0.5rem;
+  }
+
+  .prob {
+    color: var(--oxido-oscuro);
+    font-size: 0.8rem;
+    letter-spacing: 0.05em;
+    padding-top: 0.15rem;
+  }
+
+  .causas strong {
+    display: block;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  .porque {
+    display: block;
+    font-size: 0.92rem;
+    color: var(--acero);
+    line-height: 1.4;
+  }
+
+  .revisa li {
+    display: flex;
+    gap: 0.6rem;
+    font-size: 0.95rem;
+    line-height: 1.45;
+  }
+
+  .revisa .casilla {
+    margin-top: 0.1rem;
+  }
+
+  .pie-exp {
+    display: grid;
+    gap: 0.8rem;
+    padding-top: 1rem;
+    border-top: 2px dashed rgb(20 18 15 / 0.5);
+  }
+
+  .relacionado {
+    font-size: var(--text-mono-s);
+  }
+
+  .rango {
+    display: grid;
+  }
+
+  .rango .etiqueta {
+    color: var(--acero);
+  }
+
+  .monto {
+    font-size: clamp(1.5rem, 1.2rem + 1.2vw, 2.1rem);
+    font-weight: 700;
+  }
+
+  .llevar {
+    justify-self: start;
+  }
+
+  .aviso {
+    margin-top: 1.1rem;
+    padding: 0.5rem 0.6rem;
+    border: 2px solid var(--oxido-oscuro);
+    color: var(--oxido-oscuro);
+    font-size: var(--text-mono-xs);
+    font-weight: 700;
+  }
+
+  @media (max-width: 63.99rem) {
+    /* El índice se vuelve una tira desplazable de papelitos rectangulares */
+    .indice ol {
+      display: flex;
+      gap: 0.5rem;
+      overflow-x: auto;
+      padding: 0.3rem 0.2rem 0.9rem;
+      scroll-snap-type: x proximity;
+      margin-inline: calc(var(--gutter) * -1);
+      padding-inline: var(--gutter);
+    }
+
+    .indice li {
+      flex: none;
+      scroll-snap-align: start;
+    }
+
+    .indice label {
+      border: var(--borde);
+      background: var(--papel);
+      box-shadow: var(--shadow-1);
+      padding: 0.45rem 0.7rem;
+      gap: 0.5rem;
+    }
+
+    .nombre {
+      font-size: 1.35rem;
+      white-space: nowrap;
+    }
+
+    .indice input:checked + label .nombre::after {
+      content: '';
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .rejilla {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      column-gap: clamp(2rem, 4vw, 4.5rem);
+      row-gap: 2.5rem;
+    }
+
+    .cabeza {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: minmax(0, 8fr) minmax(0, 4fr);
+      align-items: end;
+      gap: 2rem;
+    }
+
+    .intro {
+      margin-bottom: 0.6rem;
+    }
+
+    .expedientes {
+      position: sticky;
+      top: 1.5rem;
+      align-self: start;
+    }
+  }
+</style>

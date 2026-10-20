@@ -1,0 +1,27 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Hero from '@/components/inicio/Hero.astro';
+import Diagnostico from '@/components/inicio/Diagnostico.astro';
+import ListaPared from '@/components/inicio/ListaPared.astro';
+import Pizarron from '@/components/inicio/Pizarron.astro';
+import Firmamos from '@/components/inicio/Firmamos.astro';
+import Equipo from '@/components/inicio/Equipo.astro';
+import Notas from '@/components/inicio/Notas.astro';
+import Preguntas from '@/components/inicio/Preguntas.astro';
+import OrdenServicio from '@/components/OrdenServicio.astro';
+import Precaucion from '@/components/ui/Precaucion.astro';
+import { businessSchema, faqSchema } from '@/lib/schema';
+---
+
+<BaseLayout jsonLd={(og) => [businessSchema(og), faqSchema()]}>
+  <Hero />
+  <Precaucion texto="Si parpadea el check engine, no lo manejes" />
+  <Diagnostico />
+  <ListaPared />
+  <Pizarron />
+  <Firmamos />
+  <Equipo />
+  <Notas />
+  <Preguntas />
+  <OrdenServicio />
+</BaseLayout>
