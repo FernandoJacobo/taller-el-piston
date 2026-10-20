@@ -17,12 +17,18 @@ const anchos = anchosArg.split(',').map(Number);
 const salida = path.resolve('qa/capturas');
 fs.mkdirSync(salida, { recursive: true });
 
-const browser = await chromium.launch({ channel: 'chrome' }).catch(() => chromium.launch());
+// Nota: en capturas de página completa Chrome deja en blanco los iframes de otro origen (el mapa de
+// OpenStreetMap). En el navegador real sí se ven; para revisarlo usa una captura del elemento.
+const browser = await chromium
+  .launch({ channel: 'chrome', args: ['--headless=new'], ignoreDefaultArgs: ['--headless'] })
+  .catch(() => chromium.launch());
+const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0 Safari/537.36';
 let problemas = 0;
 
 for (const ruta of rutas) {
   for (const ancho of anchos) {
-    const page = await browser.newPage({ viewport: { width: ancho, height: 900 }, deviceScaleFactor: 1 });
+    // UA de navegador normal: algunos servicios externos rechazan "HeadlessChrome"
+    const page = await browser.newPage({ viewport: { width: ancho, height: 900 }, deviceScaleFactor: 1, userAgent: UA });
     await page.goto(base + ruta, { waitUntil: 'networkidle' });
     // Fuerza lo que aparece al hacer scroll (sellos, odómetro) para que la captura sea fiel
     await page.evaluate(async () => {
@@ -33,7 +39,9 @@ for (const ruta of rutas) {
       }
       window.scrollTo(0, 0);
     });
-    await page.waitForTimeout(1600);
+    // Los mapas son iframes lazy: se cargan con el barrido de arriba, pero sus mosaicos tardan
+    await page.locator('iframe').evaluateAll((fs) => fs.forEach((f) => (f.loading = 'eager')));
+    await page.waitForTimeout((await page.locator('iframe').count()) ? 5000 : 1600);
     const desborde = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
     if (desborde > 0) {
       problemas++;

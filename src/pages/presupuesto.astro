@@ -107,11 +107,11 @@ import { businessSchema } from '@/lib/schema';
         </ol>
         <div class="t-raya" aria-hidden="true"></div>
         <dl class="t-totales">
-          <div class="fila-precio"><dt>Refacciones</dt><span class="guia"></span><dd class="monto" data-t="refacciones">$0</dd></div>
-          <div class="fila-precio"><dt>Mano de obra</dt><span class="guia"></span><dd class="monto" data-t="manoObra">$0</dd></div>
-          <div class="fila-precio"><dt>Subtotal</dt><span class="guia"></span><dd class="monto" data-t="subtotal">$0</dd></div>
-          <div class="fila-precio" data-fila-iva hidden><dt>IVA 16 %</dt><span class="guia"></span><dd class="monto" data-t="iva">$0</dd></div>
-          <div class="fila-precio total"><dt>Total</dt><span class="guia"></span><dd class="monto" data-t="total">$0</dd></div>
+          <div class="fila-precio"><dt>Refacciones<span class="guia"></span></dt><dd class="monto" data-t="refacciones">$0</dd></div>
+          <div class="fila-precio"><dt>Mano de obra<span class="guia"></span></dt><dd class="monto" data-t="manoObra">$0</dd></div>
+          <div class="fila-precio"><dt>Subtotal<span class="guia"></span></dt><dd class="monto" data-t="subtotal">$0</dd></div>
+          <div class="fila-precio" data-fila-iva hidden><dt>IVA 16 %<span class="guia"></span></dt><dd class="monto" data-t="iva">$0</dd></div>
+          <div class="fila-precio total"><dt>Total<span class="guia"></span></dt><dd class="monto" data-t="total">$0</dd></div>
         </dl>
         <dl class="t-tiempo">
           <div><dt>Tiempo de bahía</dt><dd data-t="horas">—</dd></div>
@@ -540,6 +540,10 @@ import { businessSchema } from '@/lib/schema';
   }
 
   .t-totales dt {
+    flex: 1;
+    display: flex;
+    align-items: baseline;
+    gap: 0.4rem;
     text-transform: uppercase;
   }
 

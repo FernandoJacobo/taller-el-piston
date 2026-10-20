@@ -46,7 +46,9 @@ export const site = {
     region: 'Jalisco',
     postalCode: '44460',
     country: 'MX',
-    reference: 'Entre Gigantes y Calle 46, el portón verde con el rótulo rojo. Si ves la llantera de la esquina, ya te pasaste.',
+    reference: 'Sobre Gigantes, casi esquina con Calle 46: el portón verde con el rótulo rojo. Si ves la llantera de la esquina, ya te pasaste.',
+    /** Calles que se dibujan en el croquis (src/components/ui/Croquis.astro) */
+    croquis: { calle: 'C. Gigantes', cruce: 'Calle 46', avenida: 'Av. Revolución', esquina: 'llantera', parada: 'parada' },
     parking: 'Cabemos 6 autos adentro mientras esperas tu diagnóstico. Sobre la calle hay lugar casi siempre después de las 10 a. m.',
     transit: 'Si dejas el auto y te vas: la parada de camión de Av. Revolución está a dos cuadras.',
   },

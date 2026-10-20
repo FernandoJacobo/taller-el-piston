@@ -2,9 +2,10 @@
 import { Image } from 'astro:assets';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import OrdenServicio from '@/components/OrdenServicio.astro';
-import { site, dayLabels, dayOrder, formatTime, fullAddress, mapEmbedUrl, mapLinkUrl, whatsappUrl } from '@/config/site';
+import { site, dayLabels, dayOrder, formatTime, fullAddress, mapLinkUrl, whatsappUrl } from '@/config/site';
 import { businessSchema } from '@/lib/schema';
 import elevador from '@/assets/fotos/elevador.jpg';
+import Croquis from '@/components/ui/Croquis.astro';
 ---
 
 <BaseLayout
@@ -68,7 +69,7 @@ import elevador from '@/assets/fotos/elevador.jpg';
     </figure>
 
     <figure class="mapa">
-      <iframe src={mapEmbedUrl} title={`Mapa: ${site.name}, ${fullAddress}`} loading="lazy" referrerpolicy="no-referrer-when-downgrade" width="600" height="360"></iframe>
+      <Croquis alto="20rem" />
     </figure>
   </div>
 
@@ -239,14 +240,6 @@ import elevador from '@/assets/fotos/elevador.jpg';
     rotate: 0.8deg;
   }
 
-  .mapa iframe {
-    display: block;
-    width: 100%;
-    height: 20rem;
-    border: var(--borde);
-    filter: grayscale(1) sepia(0.35) contrast(1.05);
-  }
-
   @media (min-width: 64rem) {
     .indicaciones {
       grid-template-columns: repeat(12, minmax(0, 1fr));
@@ -271,12 +264,12 @@ import elevador from '@/assets/fotos/elevador.jpg';
 
     .foto {
       grid-column: 1 / span 5;
-      grid-row: 2 / span 2;
+      grid-row: 2;
       margin-left: 6%;
     }
 
     .mapa {
-      grid-column: 6 / span 7;
+      grid-column: 3 / span 10;
       grid-row: 3;
     }
   }

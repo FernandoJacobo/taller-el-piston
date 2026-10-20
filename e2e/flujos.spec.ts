@@ -77,6 +77,16 @@ test.describe('Seguimiento por placa', () => {
   });
 });
 
+test.describe('Croquis', () => {
+  test('el mapa de OpenStreetMap solo se carga al pedirlo', async ({ page }) => {
+    await page.goto('/contacto');
+    const croquis = page.locator('main [data-croquis]');
+    await expect(croquis.locator('iframe')).toHaveCount(0);
+    await croquis.getByRole('button', { name: 'Ver mapa interactivo' }).click();
+    await expect(croquis.locator('iframe')).toHaveAttribute('src', /openstreetmap\.org/);
+  });
+});
+
 test.describe('Responsive', () => {
   for (const ancho of [360, 390, 768, 1024, 1280, 1536]) {
     test(`sin scroll horizontal a ${ancho}px`, async ({ page }) => {

@@ -69,6 +69,11 @@ const { class: clase = '', chico = false } = Astro.props;
     filter: url(#trazo-mano);
   }
 
+  /* En el encabezado la letra es chica: mostaza sobre óxido no da 4.5:1, se pinta en papel */
+  .logo--chico .sub {
+    color: var(--papel);
+  }
+
   .sub {
     font-family: var(--font-rotulo);
     font-weight: 800;

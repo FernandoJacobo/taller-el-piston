@@ -1,0 +1,116 @@
+---
+/**
+ * Croquis dibujado a mano de cómo llegar. El mapa de OpenStreetMap (≈300 KB de JS y mosaicos)
+ * solo se carga si la persona lo pide, así no frena la página ni avisa a terceros de cada visita.
+ */
+import { site, fullAddress, mapEmbedUrl } from '@/config/site';
+
+interface Props {
+  /** Alto del mapa interactivo cuando se carga */
+  alto?: string;
+  class?: string;
+}
+
+const { alto = '15rem', class: clase } = Astro.props;
+const c = site.address.croquis;
+---
+
+<div class:list={['croquis', clase]} style={`--alto:${alto}`} data-croquis>
+  <svg viewBox="0 0 400 260" role="img" aria-label={`Croquis: el taller está sobre ${c.calle}, casi esquina con ${c.cruce}; la ${c.parada} de ${c.avenida} queda a dos cuadras.`}>
+    <g filter="url(#trazo-mano)" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+      <!-- calle principal -->
+      <path d="M-10 104 L410 98" /><path d="M-10 134 L410 130" />
+      <!-- cruce -->
+      <path d="M276 -10 L280 98" /><path d="M306 -10 L309 99" />
+      <path d="M281 133 L286 270" /><path d="M310 131 L316 270" />
+      <!-- avenida en diagonal, más ancha -->
+      <path d="M-10 214 L140 270" /><path d="M-10 172 L230 262" stroke-width="3.5" />
+      <!-- manzanas -->
+      <path d="M30 20 h70 v55 h-70 z" stroke-width="1.5" stroke-dasharray="5 6" />
+      <path d="M140 18 h100 v60 h-100 z" stroke-width="1.5" stroke-dasharray="5 6" />
+      <path d="M150 156 h100 v40" stroke-width="1.5" stroke-dasharray="5 6" />
+      <path d="M340 160 h50 v70 h-50 z" stroke-width="1.5" stroke-dasharray="5 6" />
+    </g>
+    <!-- llantera de la esquina -->
+    <g filter="url(#trazo-mano)" stroke="currentColor" stroke-width="2" fill="none">
+      <circle cx="334" cy="72" r="12" /><circle cx="334" cy="72" r="5" />
+    </g>
+    <!-- parada de camión -->
+    <g filter="url(#trazo-mano)" stroke="currentColor" stroke-width="2" fill="none">
+      <path d="M70 196 v-26 h14 v10 h-14" />
+    </g>
+    <!-- el taller -->
+    <g filter="url(#trazo-mano)" stroke="var(--oxido)" stroke-width="5" stroke-linecap="round">
+      <path d="M212 58 L240 86 M240 58 L212 86" />
+    </g>
+    <circle cx="226" cy="72" r="24" fill="none" stroke="var(--oxido)" stroke-width="2.5" stroke-dasharray="4 5" />
+    <g class="rotulos" fill="currentColor">
+      <text x="24" y="124">{c.calle.toUpperCase()}</text>
+      <text x="0" y="0" transform="translate(300 230) rotate(-88)">{c.cruce.toUpperCase()}</text>
+      <text x="0" y="0" transform="translate(20 200) rotate(21)">{c.avenida.toUpperCase()}</text>
+      <text x="318" y="50">{c.esquina}</text>
+      <text x="90" y="182">{c.parada}</text>
+      <text x="168" y="104" class="aqui">AQUÍ</text>
+    </g>
+  </svg>
+  <button type="button" class="btn btn--papel cargar" data-cargar-mapa>Ver mapa interactivo</button>
+  <template data-mapa>
+    <iframe src={mapEmbedUrl} title={`Mapa: ${site.name}, ${fullAddress}`} referrerpolicy="no-referrer-when-downgrade"></iframe>
+  </template>
+</div>
+
+<style>
+  .croquis {
+    position: relative;
+    height: var(--alto);
+    border: var(--borde);
+    background: var(--papel);
+    color: var(--grasa);
+    overflow: hidden;
+  }
+
+  svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .rotulos {
+    font-family: var(--font-datos);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+  }
+
+  .aqui {
+    fill: var(--oxido-oscuro);
+    font-size: 13px;
+  }
+
+  .cargar {
+    position: absolute;
+    right: 0.5rem;
+    bottom: 0.5rem;
+    min-height: 2.75rem;
+    font-size: var(--text-mono-xs);
+  }
+
+  .croquis :global(iframe) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    filter: grayscale(1) sepia(0.35) contrast(1.05);
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-croquis]').forEach((caja) => {
+    caja.querySelector('[data-cargar-mapa]')?.addEventListener('click', () => {
+      const plantilla = caja.querySelector<HTMLTemplateElement>('template[data-mapa]');
+      if (!plantilla) return;
+      caja.replaceChildren(plantilla.content.cloneNode(true));
+      caja.querySelector('iframe')?.focus();
+    });
+  });
+</script>

@@ -1,7 +1,8 @@
 ---
 /** Footer: datos en tabla mono, mapa como foto pegada y el rótulo gigante cortado por el borde. */
-import { site, dayLabels, dayOrder, formatTime, fullAddress, mapEmbedUrl, mapLinkUrl, whatsappUrl } from '@/config/site';
+import { site, dayLabels, dayOrder, formatTime, fullAddress, mapLinkUrl, whatsappUrl } from '@/config/site';
 import Precaucion from '@/components/ui/Precaucion.astro';
+import Croquis from '@/components/ui/Croquis.astro';
 
 interface Props {
   sinCinta?: boolean;
@@ -52,13 +53,7 @@ const { sinCinta = false } = Astro.props;
     <figure class="bloque mapa">
       <span class="cinta" style="--r:-5deg; --w:5.5rem; left:-1rem; top:-0.7rem"></span>
       <span class="cinta" style="--r:7deg; --w:4.5rem; right:-0.8rem; bottom:1.6rem"></span>
-      <iframe
-        src={mapEmbedUrl}
-        title={`Mapa: ${site.name}, ${fullAddress}`}
-        loading="lazy"
-        referrerpolicy="no-referrer-when-downgrade"
-        width="400"
-        height="260"></iframe>
+      <Croquis alto="15rem" />
       <figcaption class="datos">
         <a class="subrayado" href={mapLinkUrl} rel="noopener" target="_blank">Cómo llegar →</a>
       </figcaption>
@@ -171,14 +166,6 @@ const { sinCinta = false } = Astro.props;
     box-shadow: 6px 6px 0 rgb(0 0 0 / 0.45);
     justify-self: start;
     width: min(100%, 26rem);
-  }
-
-  .mapa iframe {
-    display: block;
-    width: 100%;
-    height: 15rem;
-    border: var(--borde);
-    filter: grayscale(1) sepia(0.35) contrast(1.05);
   }
 
   .mapa figcaption {
