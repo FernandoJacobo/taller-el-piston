@@ -1,0 +1,89 @@
+---
+/**
+ * Rótulo pintado: lámina roja, letras de brocha con sombra de rotulista y llave de cruz.
+ * El trazo irregular sale del filtro #trazo-mano (no es una fuente "grunge").
+ */
+import { site } from '@/config/site';
+import Ilustracion from '@/components/ui/Ilustracion.astro';
+
+interface Props {
+  class?: string;
+  /** Tamaño compacto para el encabezado */
+  chico?: boolean;
+}
+const { class: clase = '', chico = false } = Astro.props;
+---
+
+<span class:list={['logo', { 'logo--chico': chico }, clase]}>
+  <span class="lamina">
+    <Ilustracion nombre="llave-cruz" class="llave" acento="mostaza" fondo="var(--oxido-oscuro)" trazo={5} />
+    <span class="letras" aria-hidden="true">{site.rotulo}</span>
+    <span class="sub" aria-hidden="true">{site.rotuloSub}</span>
+  </span>
+  <span class="desde datos" aria-hidden="true">MECÁNICA EN GENERAL · DESDE {site.foundingYear}</span>
+  <span class="sr-only">{site.name}</span>
+</span>
+
+<style>
+  .logo {
+    display: inline-grid;
+    justify-items: start;
+    gap: 0.25rem;
+    --t: 1;
+  }
+
+  .logo--chico {
+    --t: 0.62;
+  }
+
+  .lamina {
+    position: relative;
+    display: inline-flex;
+    align-items: baseline;
+    gap: calc(0.4rem * var(--t));
+    padding: calc(0.35rem * var(--t)) calc(0.9rem * var(--t)) calc(0.3rem * var(--t)) calc(2.6rem * var(--t));
+    background: var(--oxido-oscuro);
+    border: var(--borde);
+    box-shadow: var(--shadow-2);
+    rotate: -1.5deg;
+  }
+
+  .lamina :global(.llave) {
+    position: absolute;
+    left: calc(-0.9rem * var(--t));
+    top: 50%;
+    width: calc(3.2rem * var(--t));
+    translate: 0 -50%;
+    color: var(--papel);
+    rotate: 12deg;
+  }
+
+  .letras {
+    font-family: var(--font-rotulo);
+    font-weight: 900;
+    font-size: calc(2.6rem * var(--t));
+    line-height: 0.9;
+    letter-spacing: 0.02em;
+    color: var(--papel);
+    text-shadow: 2px 2px 0 var(--grasa);
+    filter: url(#trazo-mano);
+  }
+
+  .sub {
+    font-family: var(--font-rotulo);
+    font-weight: 800;
+    font-size: calc(1.05rem * var(--t));
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--mostaza);
+    align-self: flex-end;
+    padding-bottom: calc(0.2rem * var(--t));
+  }
+
+  .desde {
+    font-size: calc(0.72rem * max(var(--t), 0.85));
+    letter-spacing: 0.14em;
+    font-weight: 700;
+    padding-left: calc(2.4rem * var(--t));
+  }
+</style>

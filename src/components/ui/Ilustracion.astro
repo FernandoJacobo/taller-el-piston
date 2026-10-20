@@ -1,0 +1,245 @@
+---
+/**
+ * Ilustraciones propias del taller (DISENO.md §4).
+ * Línea gruesa en tinta + UN acento. La irregularidad "a mano" sale del filtro #trazo-mano
+ * definido una sola vez en BaseLayout (feTurbulence + feDisplacementMap con escala baja).
+ */
+import type { IlustracionNombre } from '@/data/ilustraciones';
+
+interface Props {
+  nombre: IlustracionNombre;
+  class?: string;
+  /** Color del único acento */
+  acento?: 'oxido' | 'mostaza' | 'grasa';
+  /** Si se pasa, la ilustración es informativa (role="img"); si no, decorativa */
+  titulo?: string;
+  /** Grosor de trazo (en unidades del viewBox de 120) */
+  trazo?: number;
+  /** Relleno de las piezas "de papel" (para que tape lo de atrás) */
+  fondo?: string;
+}
+
+const { nombre, class: clase = '', acento = 'oxido', titulo, trazo = 3, fondo = 'var(--papel)' } = Astro.props;
+const ac = `var(--${acento})`;
+
+const rad = (g: number) => (g * Math.PI) / 180;
+const polar = (r: number, g: number, cx = 60, cy = 60) => [cx + r * Math.cos(rad(g)), cy + r * Math.sin(rad(g))].map((n) => +n.toFixed(2));
+const hex = (cx: number, cy: number, r: number) =>
+  Array.from({ length: 6 }, (_, i) => polar(r, i * 60 + 30, cx, cy).join(',')).join(' ');
+
+// Manómetro: marcas de 135° a 405°
+const marcas = Array.from({ length: 11 }, (_, i) => {
+  const g = 135 + i * 27;
+  const largo = i % 5 === 0 ? 10 : 6;
+  return [polar(38, g), polar(38 - largo, g)];
+});
+const arcoRojo = (() => {
+  const [x1, y1] = polar(40, 351);
+  const [x2, y2] = polar(40, 405);
+  return `M${x1} ${y1} A40 40 0 0 1 ${x2} ${y2}`;
+})();
+
+// Disco de freno: barrenos de ventilación
+const barrenos = Array.from({ length: 14 }, (_, i) => polar(34, i * (360 / 14) + 8));
+const birlos = Array.from({ length: 5 }, (_, i) => polar(13, i * 72 - 90));
+
+// Clutch: resortes tangenciales y remaches
+const resortes = Array.from({ length: 6 }, (_, i) => ({ c: polar(21, i * 60 + 30), g: i * 60 + 120 }));
+const remaches = Array.from({ length: 16 }, (_, i) => polar(39, i * 22.5));
+
+// Llanta: dibujo de la banda y birlos
+const banda = Array.from({ length: 24 }, (_, i) => [polar(52, i * 15), polar(45, i * 15 + 6)]);
+const rayos = Array.from({ length: 5 }, (_, i) => [polar(9, i * 72 - 90), polar(27, i * 72 - 90)]);
+
+// Ventilador: aspas curvas
+const aspas = Array.from({ length: 5 }, (_, i) => {
+  const g = i * 72;
+  const [ax, ay] = polar(10, g);
+  const [bx, by] = polar(38, g + 18);
+  const [cx1, cy1] = polar(30, g - 20);
+  const [dx, dy] = polar(38, g + 50);
+  const [cx2, cy2] = polar(16, g + 40);
+  return `M${ax} ${ay} Q${cx1} ${cy1} ${bx} ${by} L${dx} ${dy} Q${cx2} ${cy2} ${ax} ${ay} Z`;
+});
+---
+
+<svg
+  class:list={['ilus', clase]}
+  viewBox="0 0 120 120"
+  fill="none"
+  stroke="currentColor"
+  stroke-width={trazo}
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  {...titulo ? { role: 'img', 'aria-label': titulo } : { 'aria-hidden': 'true', focusable: 'false' }}
+>
+  {titulo && <title>{titulo}</title>}
+  <g class="trazo">
+    {
+      nombre === 'llave-cruz' && (
+        <>
+          <rect x="-5.5" y="-52" width="11" height="104" transform="translate(60 60) rotate(45)" fill={fondo} />
+          <rect x="-5.5" y="-52" width="11" height="104" transform="translate(60 60) rotate(-45)" fill={fondo} />
+          <rect x="-5.5" y="-12" width="11" height="24" transform="translate(60 60) rotate(45)" fill={fondo} stroke="none" />
+          <circle cx="60" cy="60" r="7" fill={fondo} />
+          {[
+            [23, 23],
+            [97, 23],
+            [23, 97],
+            [97, 97],
+          ].map(([x, y], i) => (
+            <>
+              <circle cx={x} cy={y} r={11 - i} fill={i === 1 ? ac : fondo} />
+              <polygon points={hex(x, y, 5.5 - i * 0.6)} fill={fondo} />
+            </>
+          ))}
+        </>
+      )
+    }
+
+    {
+      nombre === 'disco-freno' && (
+        <>
+          <circle cx="60" cy="60" r="47" fill={fondo} />
+          <circle cx="60" cy="60" r="41" stroke-dasharray="2 5" stroke-width={trazo * 0.6} />
+          <circle cx="60" cy="60" r="22" />
+          <circle cx="60" cy="60" r="7" />
+          {birlos.map(([x, y]) => <circle cx={x} cy={y} r="2.4" />)}
+          {barrenos.map(([x, y]) => <circle cx={x} cy={y} r="1.6" stroke-width={trazo * 0.8} />)}
+          <path d="M77.8 11.1 A52 52 0 0 1 111.2 51 L95.5 53.7 A36 36 0 0 0 72.3 26.2 Z" fill={ac} />
+          <path d="M84 24 l6 6 M92 33 l5 5" stroke-width={trazo * 0.7} />
+        </>
+      )
+    }
+
+    {
+      nombre === 'bujia' && (
+        <>
+          <rect x="55" y="5" width="10" height="11" rx="1" fill={fondo} />
+          <path d="M52 16 H68 L70 54 H50 Z" fill={fondo} />
+          <path d="M53 26 H67 M52.5 35 H67.5 M52 44 H68" stroke-width={trazo * 0.7} />
+          <path d="M44 54 H76 L78 61 L76 68 H44 L42 61 Z" fill={fondo} />
+          <path d="M53 54 V68 M67 54 V68" stroke-width={trazo * 0.7} />
+          <rect x="50" y="68" width="20" height="23" fill={fondo} />
+          <path d="M50 73 L70 70 M50 79 L70 76 M50 85 L70 82 M50 91 L70 88" stroke-width={trazo * 0.7} />
+          <path d="M60 91 V99 M67 91 V103 H59" />
+          <path d="M44 108 L50 103 L50 109 L57 104 L55 112 L48 113 L44 108 Z" fill={ac} stroke-width={trazo * 0.7} />
+          <path d="M38 98 l-6 -3 M40 108 l-7 1 M74 108 l6 3" stroke-width={trazo * 0.7} />
+        </>
+      )
+    }
+
+    {
+      nombre === 'amortiguador' && (
+        <>
+          <rect x="46" y="6" width="28" height="8" fill={fondo} />
+          <path d="M60 14 V42" />
+          <rect x="51" y="42" width="18" height="60" fill={fondo} />
+          <path d="M55 50 V94" stroke-width={trazo * 0.6} />
+          <circle cx="60" cy="109" r="7" fill={fondo} />
+          <circle cx="60" cy="109" r="2.5" />
+          <ellipse cx="60" cy="22" rx="24" ry="4.5" fill={fondo} />
+          <ellipse cx="60" cy="96" rx="24" ry="4.5" fill={fondo} />
+          <path d="M38 25 C50 31 72 27 82 33 M38 33 C50 39 72 35 82 41 M38 41 C50 47 72 43 82 49 M38 49 C50 55 72 51 82 57 M38 57 C50 63 72 59 82 65 M38 65 C50 71 72 67 82 73 M38 73 C50 79 72 75 82 81 M38 81 C50 87 72 83 82 89" stroke={ac} stroke-width={trazo * 1.15} />
+        </>
+      )
+    }
+
+    {
+      nombre === 'piston' && (
+        <>
+          <path d="M54 60 L49 92 M66 60 L71 92" />
+          <circle cx="60" cy="100" r="15" fill={fondo} />
+          <circle cx="60" cy="100" r="8" fill={ac} />
+          <path d="M28 22 Q60 14 92 22 V64 H28 Z" fill={fondo} />
+          <path d="M28 22 Q60 14 92 22 V27 Q60 20 28 27 Z" fill={ac} />
+          <path d="M28 33 H92 M28 39 H92 M28 45 H92" stroke-width={trazo * 0.7} />
+          <circle cx="60" cy="55" r="6" />
+          <path d="M36 52 v8 M84 52 v8" stroke-width={trazo * 0.6} />
+        </>
+      )
+    }
+
+    {
+      nombre === 'bayoneta' && (
+        <>
+          <circle cx="22" cy="22" r="12" fill={fondo} />
+          <circle cx="22" cy="22" r="5" />
+          <path d="M31 31 L104 104" stroke-width={trazo * 1.4} />
+          <path d="M80 86 L86 80 M86 92 L92 86 M92 98 L98 92" stroke-width={trazo * 0.8} />
+          <path d="M83 83 L95 95" stroke={ac} stroke-width={trazo * 2.2} />
+          <path d="M104 56 C110 66 112 70 112 74 A8 8 0 0 1 96 74 C96 70 98 66 104 56 Z" fill={ac} />
+          <path d="M58 52 l-6 6 M66 60 l-6 6" stroke-width={trazo * 0.6} />
+        </>
+      )
+    }
+
+    {
+      nombre === 'manometro' && (
+        <>
+          <circle cx="60" cy="60" r="48" fill={fondo} />
+          <circle cx="60" cy="60" r="43" stroke-width={trazo * 0.6} />
+          {marcas.map(([[x1, y1], [x2, y2]]) => <path d={`M${x1} ${y1} L${x2} ${y2}`} stroke-width={trazo * 0.8} />)}
+          <path d={arcoRojo} stroke={ac} stroke-width={trazo * 2.4} stroke-linecap="butt" />
+          <path d="M60 60 L84 34" stroke-width={trazo * 1.1} />
+          <circle cx="60" cy="60" r="6" fill="currentColor" />
+          <rect x="46" y="80" width="28" height="9" stroke-width={trazo * 0.6} />
+          <path d="M60 108 V118" stroke-width={trazo * 2} />
+        </>
+      )
+    }
+
+    {
+      nombre === 'clutch' && (
+        <>
+          <circle cx="60" cy="60" r="47" fill={fondo} />
+          <circle cx="60" cy="60" r="32" />
+          {remaches.map(([x, y]) => <circle cx={x} cy={y} r="1.3" stroke-width={trazo * 0.7} />)}
+          {resortes.map(({ c: [x, y], g }) => (
+            <rect x={x - 6} y={y - 2.8} width="12" height="5.6" rx="2.5" transform={`rotate(${g} ${x} ${y})`} fill={ac} stroke-width={trazo * 0.7} />
+          ))}
+          <circle cx="60" cy="60" r="11" fill={fondo} />
+          <polygon points={hex(60, 60, 5)} />
+        </>
+      )
+    }
+
+    {
+      nombre === 'ventilador' && (
+        <>
+          <rect x="10" y="10" width="100" height="100" fill={fondo} />
+          <circle cx="60" cy="60" r="44" />
+          {aspas.map((d) => <path d={d} fill={fondo} stroke-width={trazo * 0.85} />)}
+          <circle cx="60" cy="60" r="8" fill="currentColor" />
+          <path d="M14 14 l7 7 M106 14 l-7 7 M14 106 l7 -7 M106 106 l-7 -7" stroke-width={trazo * 0.7} />
+          <g stroke={ac} stroke-width={trazo * 0.9}>
+            <path d="M98 -4 V22 M87 3 L109 15 M87 15 L109 3" />
+          </g>
+        </>
+      )
+    }
+
+    {
+      nombre === 'llanta' && (
+        <>
+          <circle cx="60" cy="60" r="52" fill={fondo} />
+          {banda.map(([[x1, y1], [x2, y2]]) => <path d={`M${x1} ${y1} L${x2} ${y2}`} stroke-width={trazo * 0.8} />)}
+          <circle cx="60" cy="60" r="40" />
+          <circle cx="60" cy="60" r="29" fill={fondo} />
+          {rayos.map(([[x1, y1], [x2, y2]]) => <path d={`M${x1} ${y1} L${x2} ${y2}`} stroke-width={trazo * 1.4} />)}
+          <circle cx="60" cy="60" r="7" />
+          <path d="M84 77 L92 86" stroke={ac} stroke-width={trazo * 1.8} />
+        </>
+      )
+    }
+
+    {
+      nombre === 'flecha' && (
+        <>
+          <path d="M8 74 C30 30 74 22 104 48" stroke={ac} />
+          <path d="M88 36 L106 50 L86 58" stroke={ac} />
+        </>
+      )
+    }
+  </g>
+</svg>
