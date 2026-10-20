@@ -1,0 +1,491 @@
+---
+/**
+ * Lista de precios completa, como la pared del taller: agrupada por sistema, con filtro
+ * rápido y buscador. Cada fila es un <details>: se abre para ver qué incluye, tiempo,
+ * garantía y cuándo conviene. Sin JS la lista completa sigue funcionando.
+ */
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Ilustracion from '@/components/ui/Ilustracion.astro';
+import { servicios, sistemas } from '@/data/servicios';
+import { formatoHoras, partida, precioDesde } from '@/lib/cotizador';
+import { formatMXN } from '@/config/site';
+import { businessSchema, servicesSchema } from '@/lib/schema';
+
+const grupos = sistemas.map((g) => ({ ...g, lista: servicios.filter((s) => s.sistema === g.id) }));
+const normal = (t: string) => t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+---
+
+<BaseLayout
+  title="Lista de precios"
+  description={`Precios de taller mecánico en Guadalajara: ${servicios.length} servicios con precio desde, qué incluye, tiempo y garantía. Frenos, afinación, suspensión, clutch, A/C y más.`}
+  folio="0002"
+  jsonLd={(og) => [businessSchema(og), ...servicesSchema()]}
+>
+  <section class="cabeza contenedor" aria-labelledby="titulo">
+    <p class="etiqueta">Hoja 2 · Pegada junto a la caja</p>
+    <h1 id="titulo" class="titulo">Lista de precios</h1>
+    <div class="aclara">
+      <p class="lead">
+        Lo que cuesta, sin letra chiquita. Precio <strong>desde</strong> para auto compacto con refacción económica, en pesos y sin IVA. Para tu auto exacto, usa el <a class="subrayado" href="/presupuesto">cotizador</a>.
+      </p>
+      <p class="datos sello sello--oscuro" style="--r:4deg">Precios {new Date().getFullYear()}</p>
+    </div>
+  </section>
+
+  <div class="contenedor herramientas" data-filtros>
+    <div class="buscar campo">
+      <label for="q">Buscar en la lista</label>
+      <input id="q" type="search" placeholder="balatas, clutch, gas…" autocomplete="off" data-q />
+    </div>
+    <fieldset class="filtro">
+      <legend class="etiqueta">Sistema</legend>
+      <div class="pestanas">
+        <label><input type="radio" name="sistema" value="" checked /><span>Todos</span></label>
+        {
+          sistemas.map((g) => (
+            <label>
+              <input type="radio" name="sistema" value={g.id} />
+              <span>{g.corto}</span>
+            </label>
+          ))
+        }
+      </div>
+    </fieldset>
+    <p class="datos cuenta" role="status" data-cuenta>{servicios.length} servicios</p>
+  </div>
+
+  <div class="contenedor muro">
+    {
+      grupos.map((g, gi) => (
+        <section class:list={['grupo', { 'grupo--alt': gi % 2 === 1 }]} id={`sistema-${g.id}`} data-grupo={g.id} aria-labelledby={`g-${g.id}`}>
+          <header class="g-cab">
+            <Ilustracion nombre={g.ilustracion} class="g-ilus" acento={gi % 3 === 1 ? 'mostaza' : 'oxido'} />
+            <div>
+              <h2 id={`g-${g.id}`} class="g-titulo">{g.nombre}</h2>
+              <p class="g-dicho">{g.dicho}</p>
+            </div>
+          </header>
+
+          <div class="hoja g-lista">
+            {g.lista.map((s) => {
+              const suv = partida(s, 'suv', 'equivalente');
+              return (
+                <details class="fila" id={s.id} data-fila data-sistema={s.sistema} data-texto={normal(`${s.nombre} ${s.incluye.join(' ')} ${g.nombre}`)}>
+                  <summary class="fila-precio">
+                    <span class="casilla" aria-hidden="true" />
+                    <span class="nombre">{s.nombre}</span>
+                    <span class="guia" aria-hidden="true" />
+                    <span class="monto">
+                      <span class="desde">desde </span>
+                      {formatMXN(precioDesde(s))}
+                    </span>
+                  </summary>
+                  <div class="detalle">
+                    <div>
+                      <h3 class="etiqueta">Qué incluye</h3>
+                      <ul class="incluye">
+                        {s.incluye.map((i) => (
+                          <li>{i}</li>
+                        ))}
+                      </ul>
+                    </div>
+                    <dl class="datos ficha">
+                      <div>
+                        <dt>Tiempo</dt>
+                        <dd>{formatoHoras(s.horas)} (compacto)</dd>
+                      </div>
+                      <div>
+                        <dt>Garantía</dt>
+                        <dd>{s.garantia}</dd>
+                      </div>
+                      <div>
+                        <dt>En SUV</dt>
+                        <dd>{formatMXN(suv.refaccion + suv.manoObra)} con refacción equivalente</dd>
+                      </div>
+                    </dl>
+                    <p class="cuando">
+                      <span class="etiqueta">Cuándo conviene</span>
+                      {s.cuando}
+                    </p>
+                    <a class="btn btn--papel cotizar" href={`/presupuesto?s=${s.id}`}>
+                      Cotizar para mi auto
+                    </a>
+                  </div>
+                </details>
+              );
+            })}
+          </div>
+        </section>
+      ))
+    }
+    <p class="vacio datos" data-vacio hidden>No encontramos eso en la lista. Pregúntanos por WhatsApp: si se puede hacer, lo hacemos.</p>
+  </div>
+</BaseLayout>
+
+<script>
+  const quitarAcentos = (t: string) => t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+  const filtros = document.querySelector<HTMLElement>('[data-filtros]')!;
+  const q = filtros.querySelector<HTMLInputElement>('[data-q]')!;
+  const filas = [...document.querySelectorAll<HTMLDetailsElement>('[data-fila]')];
+  const grupos = [...document.querySelectorAll<HTMLElement>('[data-grupo]')];
+  const cuenta = filtros.querySelector('[data-cuenta]')!;
+  const vacio = document.querySelector<HTMLElement>('[data-vacio]')!;
+
+  function aplicar() {
+    const texto = quitarAcentos(q.value);
+    const sistema = (filtros.querySelector<HTMLInputElement>('input[name="sistema"]:checked')?.value ?? '');
+    let visibles = 0;
+    for (const f of filas) {
+      const ok = (!sistema || f.dataset.sistema === sistema) && (!texto || (f.dataset.texto ?? '').includes(texto));
+      f.hidden = !ok;
+      if (ok) visibles++;
+      // Al buscar, se abren las coincidencias para ver el detalle de inmediato
+      if (texto && ok && visibles <= 3) f.open = true;
+    }
+    for (const g of grupos) g.hidden = !g.querySelector('[data-fila]:not([hidden])');
+    vacio.hidden = visibles > 0;
+    cuenta.textContent = `${visibles} ${visibles === 1 ? 'servicio' : 'servicios'}`;
+  }
+
+  q.addEventListener('input', aplicar);
+  filtros.addEventListener('change', aplicar);
+
+  // /servicios#balatas-delanteras abre esa fila (viene del inicio o del diagnóstico)
+  function abrirHash() {
+    const id = decodeURIComponent(location.hash.slice(1));
+    const fila = id ? document.getElementById(id) : null;
+    if (fila instanceof HTMLDetailsElement) {
+      fila.open = true;
+      fila.scrollIntoView({ block: 'center' });
+      fila.querySelector('summary')?.focus({ preventScroll: true });
+    }
+  }
+  abrirHash();
+  addEventListener('hashchange', abrirHash);
+</script>
+
+<style>
+  .cabeza {
+    padding-block: clamp(1.5rem, 4vw, 3rem) 1.5rem;
+  }
+
+  .cabeza .etiqueta {
+    color: var(--oxido-oscuro);
+  }
+
+  .titulo {
+    font-size: var(--text-rotulo-xl);
+    line-height: 0.8;
+    margin-top: 0.4rem;
+  }
+
+  .aclara {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem 2.5rem;
+    margin-top: 1.4rem;
+  }
+
+  .lead {
+    max-width: 38rem;
+    font-size: var(--text-lead);
+  }
+
+  .aclara .sello {
+    font-size: 1.5rem;
+  }
+
+  /* ─── Herramientas: buscador y pestañas de sistema ─── */
+  .herramientas {
+    position: sticky;
+    top: 0;
+    z-index: 15;
+    display: grid;
+    gap: 0.8rem;
+    padding-block: 0.9rem;
+    background: var(--kraft);
+    background-image: var(--grano);
+    border-block: var(--borde);
+  }
+
+  .buscar input {
+    font-size: 1.1rem;
+  }
+
+  .filtro {
+    border: 0;
+    margin: 0;
+    padding: 0;
+    min-width: 0;
+  }
+
+  .filtro legend {
+    color: var(--acero-oscuro);
+    margin-bottom: 0.3rem;
+  }
+
+  .pestanas {
+    display: flex;
+    gap: 0.4rem;
+    overflow-x: auto;
+    padding-bottom: 0.3rem;
+  }
+
+  .pestanas label {
+    flex: none;
+    cursor: pointer;
+  }
+
+  .pestanas input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .pestanas span {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 0.8rem;
+    border: var(--borde);
+    background: var(--papel);
+    font-family: var(--font-datos);
+    font-weight: 700;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+  }
+
+  .pestanas input:checked + span {
+    background: var(--grasa);
+    color: var(--mostaza);
+  }
+
+  .pestanas input:focus-visible + span {
+    outline: 3px solid var(--oxido-oscuro);
+    outline-offset: 2px;
+  }
+
+  .cuenta {
+    font-size: var(--text-mono-xs);
+    color: var(--acero-oscuro);
+    font-weight: 700;
+  }
+
+  /* ─── Muro ─── */
+  .muro {
+    display: grid;
+    gap: clamp(3rem, 6vw, 5rem);
+    padding-block: 2.5rem 4rem;
+  }
+
+  .g-cab {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .g-cab :global(.g-ilus) {
+    width: clamp(4.5rem, 10vw, 7rem);
+    flex: none;
+  }
+
+  .g-titulo {
+    font-size: var(--text-rotulo-m);
+  }
+
+  .g-dicho {
+    font-family: var(--font-datos);
+    font-size: var(--text-mono-s);
+    color: var(--acero-oscuro);
+    margin-top: 0.3rem;
+    max-width: 30rem;
+  }
+
+  .g-lista {
+    padding: 0.4rem clamp(0.9rem, 3vw, 2rem);
+    rotate: var(--r, 0.3deg);
+  }
+
+  .grupo--alt .g-lista {
+    --r: -0.4deg;
+  }
+
+  .fila {
+    border-bottom: 1.5px solid rgb(20 18 15 / 0.2);
+    scroll-margin-top: 9rem;
+  }
+
+  .fila:last-child {
+    border-bottom: 0;
+  }
+
+  summary {
+    list-style: none;
+    cursor: pointer;
+    min-height: 3.2rem;
+    padding: 0.7rem 0;
+  }
+
+  summary::-webkit-details-marker {
+    display: none;
+  }
+
+  summary .casilla {
+    width: 1.1rem;
+    height: 1.1rem;
+    font-size: 0.75rem;
+    color: var(--oxido-oscuro);
+    translate: 0 0.1rem;
+    margin-right: 0.3rem;
+  }
+
+  .fila[open] summary .casilla::before {
+    content: '✕';
+  }
+
+  .nombre {
+    font-weight: 600;
+    font-size: 1.05rem;
+  }
+
+  summary:hover .nombre {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+  }
+
+  .monto {
+    font-size: 1.05rem;
+  }
+
+  .desde {
+    font-weight: 400;
+    font-size: 0.75rem;
+    color: var(--acero);
+  }
+
+  .detalle {
+    display: grid;
+    gap: 1rem;
+    padding: 0.2rem 0 1.4rem 1.7rem;
+  }
+
+  .detalle .etiqueta {
+    display: block;
+    color: var(--acero);
+    margin-bottom: 0.3rem;
+  }
+
+  .incluye {
+    margin: 0;
+    padding-left: 1.1rem;
+    display: grid;
+    gap: 0.2rem;
+  }
+
+  .ficha {
+    margin: 0;
+    display: grid;
+    gap: 0.4rem;
+    font-size: var(--text-mono-s);
+  }
+
+  .ficha div {
+    display: grid;
+    grid-template-columns: 6rem 1fr;
+    gap: 0.5rem;
+  }
+
+  .ficha dt {
+    color: var(--acero);
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    padding-top: 0.15rem;
+  }
+
+  .ficha dd {
+    margin: 0;
+  }
+
+  .cuando {
+    max-width: 36rem;
+  }
+
+  .cotizar {
+    justify-self: start;
+    min-height: 2.9rem;
+    font-size: 0.82rem;
+  }
+
+  .vacio {
+    padding: 1.2rem;
+    border: 2px dashed var(--grasa);
+    font-size: var(--text-mono-s);
+  }
+
+  @media (max-width: 30rem) {
+    .fila-precio {
+      flex-wrap: wrap;
+    }
+
+    .fila-precio .guia {
+      display: none;
+    }
+
+    .fila-precio .nombre {
+      flex: 1 1 70%;
+    }
+
+    .fila-precio .monto {
+      padding-left: 1.7rem;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .herramientas {
+      grid-template-columns: minmax(14rem, 22rem) 1fr auto;
+      align-items: end;
+      gap: 1.5rem;
+    }
+
+    .grupo {
+      display: grid;
+      grid-template-columns: minmax(14rem, 4fr) minmax(0, 8fr);
+      gap: 3rem;
+      align-items: start;
+    }
+
+    .grupo--alt {
+      grid-template-columns: minmax(0, 8fr) minmax(14rem, 4fr);
+    }
+
+    .grupo--alt .g-cab {
+      order: 2;
+    }
+
+    .g-cab {
+      position: sticky;
+      top: 9.5rem;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .g-cab :global(.g-ilus) {
+      width: 9rem;
+    }
+
+    .detalle {
+      grid-template-columns: 1fr 1fr;
+      column-gap: 2.5rem;
+    }
+
+    .cuando,
+    .cotizar {
+      grid-column: 1 / -1;
+    }
+  }
+</style>
