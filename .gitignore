@@ -6,3 +6,8 @@ qa/capturas/
 test-results/
 playwright-report/
 *.log
+
+# material para redes: pesado, se regenera con npm run social
+social/_frames/
+social/capturas/
+social/video/

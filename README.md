@@ -44,6 +44,7 @@ npm run preview
 | `npm run e2e` | Flujos en navegador (levanta `astro preview` en el puerto 4400; antes corre `npm run build`) |
 | `npm run qa -- <url> <rutas> <anchos>` | Capturas de página completa en `qa/capturas/` y aviso si hay scroll horizontal. Ejemplo: `npm run qa -- http://localhost:4321 /,/servicios 390,768,1440` |
 | `npm run og` | Regenera `public/og.jpg` con el nombre, lema y teléfono de `site.ts` |
+| `npm run social -- [capture] [compose] [video] --base=<url>` | Contenido para redes en `social/`: capturas, posts, carrusel y videos 9:16 y 16:9 (necesita `npm run preview` corriendo). Los textos para publicar están en `social/copys.md` |
 | `npm run check` | Revisión de tipos de Astro |
 
 Playwright usa el Chrome instalado en el sistema (`channel: 'chrome'`). Si no lo tienes, corre `npx playwright install chromium`.
