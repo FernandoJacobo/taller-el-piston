@@ -108,6 +108,68 @@
     scroll-padding-top: 1rem;
   }
 
+  /* Barra de scroll: riel de grasa y corredera mostaza, cuadrada como etiqueta de taller.
+     Chrome/Edge/Safari usan los pseudoelementos; Firefox solo entiende scrollbar-color. */
+  html::-webkit-scrollbar {
+    width: 14px;
+  }
+
+  html::-webkit-scrollbar-track {
+    background: var(--grasa);
+  }
+
+  html::-webkit-scrollbar-thumb {
+    background: var(--mostaza);
+    border: 3px solid var(--grasa);
+    border-radius: 0;
+    min-height: 3rem;
+  }
+
+  html::-webkit-scrollbar-thumb:hover {
+    background: var(--oxido);
+  }
+
+  html::-webkit-scrollbar-thumb:active {
+    background: var(--oxido-oscuro);
+  }
+
+  /* Tiras que se deslizan de lado (síntomas, filtros): riel delgado de tinta sobre el kraft */
+  body *::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  body *::-webkit-scrollbar-track {
+    background: rgb(20 18 15 / 0.12);
+  }
+
+  body *::-webkit-scrollbar-thumb {
+    background: var(--grasa);
+    border-radius: 0;
+  }
+
+  body *::-webkit-scrollbar-thumb:hover {
+    background: var(--oxido-oscuro);
+  }
+
+  ::-webkit-scrollbar-button,
+  ::-webkit-scrollbar-corner {
+    display: none;
+    background: transparent;
+  }
+
+  /* Si se ponen en Chrome, anulan los pseudoelementos de arriba: solo para Firefox */
+  @supports not selector(::-webkit-scrollbar) {
+    html {
+      scrollbar-color: var(--mostaza) var(--grasa);
+    }
+
+    body * {
+      scrollbar-width: thin;
+      scrollbar-color: var(--grasa) rgb(20 18 15 / 0.12);
+    }
+  }
+
   @media (prefers-reduced-motion: no-preference) {
     html {
       scroll-behavior: smooth;
