@@ -51,7 +51,7 @@ Playwright usa el Chrome instalado en el sistema (`channel: 'chrome'`). Si no lo
 
 ## Publicar en Cloudflare Pages
 
-- Comando de build: `npm run build`
+- Comando de build: `npm run build` (Node 24, fijado en `.node-version`; Astro 7 pide Node ≥ 22.22)
 - Directorio de salida: `dist`
 - Los encabezados de caché y seguridad están en `public/_headers`.
 - El `package-lock.json` está generado con npm 10, el mismo que usa la imagen de build de Pages. Si lo regeneras con otro npm, usa `npx npm@10 install --package-lock-only`.
