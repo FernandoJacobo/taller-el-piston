@@ -79,13 +79,13 @@ El contraste de **tamaño** es el protagonista: un titular de 17 vw junto a un p
 | H | Notas de clientes | **Tablero perforado (pegboard)**: 6 papelitos de tamaños distintos clavados con tachuela o cinta sobre un fondo de agujeros | masonry manual, 3 alturas |
 | I | Preguntas | **Columna angosta de casillas**: FAQ como renglones ☐/☒ de formulario en una columna estrecha a la izquierda; a la derecha mucho vacío con una sola nota de plumón | 7 / 5 vacío intencional |
 | J | Orden de servicio (CTA) | **Hoja con talón desprendible**: formulario a la izquierda, talón perforado a la derecha con el folio y "conserve este talón" | 9 / 3 con perforación vertical |
-| K | Footer | **Rótulo gigante cortado**: "RANGEL" a 30 vw cortado por el borde inferior, datos en tabla mono arriba, mapa con marco de foto pegada | 3 bloques + rótulo a sangre |
+| K | Footer | **Rótulo gigante cortado**: "RANGEL" a 30 vw cortado por el borde inferior, datos en tabla mono arriba, croquis dibujado con marco de foto pegada (el mapa real se carga al pedirlo) | 3 bloques + rótulo a sangre |
 
 Entre B y C va la **cinta de precaución 1**; entre H e I corre el **marquee** único; la **cinta de precaución 2** es la orilla superior del footer: es el mismo elemento en todas las páginas, así que el sitio nunca muestra más de dos cintas a la vez.
 
 ### Móvil (no se apila sin más)
 
-- B: el titular baja a 4 renglones a 19 vw; la hoja se monta sobre el último renglón (margen negativo) y el sello cambia de lado.
+- B: el titular baja a 3 renglones a 19 vw; la hoja va justo debajo, recargada a la derecha y rotada (en QA se vio que encimarla tapaba "ES NORMAL.").
 - C: el índice se vuelve una tira horizontal desplazable de "chips" rectangulares de papel (sin radio) **y** el expediente queda debajo; al elegir, se hace scroll al expediente.
 - D: el título vertical pasa a horizontal arriba pero con rotación −2° pegado como tira de cinta de rotular.
 - E: columnas del pizarrón como filas con la tira a la derecha.
