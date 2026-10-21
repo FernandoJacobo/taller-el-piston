@@ -263,12 +263,19 @@ const activo = (href: string) => {
       border-top: 2px dashed rgb(20 18 15 / 0.4);
     }
 
+    /* una sola fila; si no cabe (360 px) se desliza de lado en vez de partirse */
     nav ul {
-      gap: 0 0.9rem;
+      flex-wrap: nowrap;
+      justify-content: space-between;
+      gap: 0 0.6rem;
+      overflow-x: auto;
+      scrollbar-width: none;
     }
 
     nav a {
-      font-size: 0.8rem;
+      font-size: min(0.74rem, 3vw);
+      letter-spacing: 0.02em;
+      white-space: nowrap;
     }
   }
 </style>

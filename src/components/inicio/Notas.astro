@@ -25,13 +25,16 @@ const giros = [-2.5, 1.8, -1, 2.6, -1.8, 1.2];
             {sujecion[i] === 'cinta' && <span class="cinta" style={`--r:${i % 2 ? 4 : -5}deg; left:calc(50% - 3.2rem); top:-0.85rem`} />}
             {sujecion[i] === 'grapa' && <span class="grapa" style="left:1rem; top:0.5rem" />}
             <blockquote>
-              {n.forma === 'tarjeta' && <p class="membrete" aria-hidden="true">{n.firma} · {n.auto}</p>}
+              {n.forma === 'tarjeta' && <p class="membrete" aria-hidden="true">{n.firma}</p>}
               {n.forma === 'servilleta' && <Ilustracion nombre="ventilador" class="dibujito" acento="grasa" trazo={2.4} fondo="transparent" />}
               <p class:list={['texto', { plumon: n.forma === 'mano' }]} style={n.forma === 'mano' ? '--r:0deg' : undefined}>
                 {n.texto}
               </p>
               <footer class="datos">
-                <cite>{n.firma}</cite> · {n.auto} · <time>{n.fecha}</time>
+                {/* en la tarjeta el nombre ya va impreso arriba: abajo solo se repite para lectores de pantalla */}
+                <cite class:list={{ 'sr-only': n.forma === 'tarjeta' }}>{n.firma}</cite>
+                {n.forma !== 'tarjeta' && ' · '}
+                {n.auto} · <time>{n.fecha}</time>
               </footer>
             </blockquote>
           </li>

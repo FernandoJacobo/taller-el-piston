@@ -33,7 +33,7 @@ const css = sintomas
         {
           sintomas.map((s, i) => (
             <li>
-              <input type="radio" name="sintoma" id={`sin-${s.id}`} value={s.id} class="sr-only" />
+              <input type="radio" name="sintoma" id={`sin-${s.id}`} value={s.id} class="sr-only" checked={i === 0} />
               <label for={`sin-${s.id}`}>
                 <span class="num datos">{String(i + 1).padStart(2, '0')}</span>
                 <span class="nombre">{s.nombre}</span>
@@ -174,7 +174,8 @@ const css = sintomas
 
   .titulo {
     font-size: var(--text-rotulo-l);
-    margin-top: 0.4rem;
+    margin-top: 0.9rem;
+    line-height: 0.95;
     max-width: 14ch;
   }
 

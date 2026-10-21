@@ -213,8 +213,14 @@ import { formatMXN } from '@/config/site';
       display: none;
     }
 
+    /* el nombre se parte en dos renglones; el precio nunca baja de línea */
     .fila-precio .nombre {
-      flex: 1 1 60%;
+      flex: 1 1 0;
+      min-width: 0;
+    }
+
+    .fila-precio .monto {
+      text-align: right;
     }
   }
 
