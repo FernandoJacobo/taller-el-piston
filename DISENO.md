@@ -1,4 +1,4 @@
-# DISEÑO — Taller Rangel e Hijos
+# DISEÑO — Taller El Pistón
 
 > Contrato de dirección de arte. Si algo del sitio no cabe aquí, no entra.
 
@@ -79,7 +79,7 @@ El contraste de **tamaño** es el protagonista: un titular de 17 vw junto a un p
 | H | Notas de clientes | **Tablero perforado (pegboard)**: 6 papelitos de tamaños distintos clavados con tachuela o cinta sobre un fondo de agujeros | masonry manual, 3 alturas |
 | I | Preguntas | **Columna angosta de casillas**: FAQ como renglones ☐/☒ de formulario en una columna estrecha a la izquierda; a la derecha mucho vacío con una sola nota de plumón | 7 / 5 vacío intencional |
 | J | Orden de servicio (CTA) | **Hoja con talón desprendible**: formulario a la izquierda, talón perforado a la derecha con el folio y "conserve este talón" | 9 / 3 con perforación vertical |
-| K | Footer | **Rótulo gigante cortado**: "RANGEL" a 30 vw cortado por el borde inferior, datos en tabla mono arriba, croquis dibujado con marco de foto pegada (el mapa real se carga al pedirlo) | 3 bloques + rótulo a sangre |
+| K | Footer | **Rótulo gigante cortado**: "PISTÓN" a 30 vw cortado por el borde inferior, datos en tabla mono arriba, croquis dibujado con marco de foto pegada (el mapa real se carga al pedirlo) | 3 bloques + rótulo a sangre |
 
 Entre B y C va la **cinta de precaución 1**; entre H e I corre el **marquee** único; la **cinta de precaución 2** es la orilla superior del footer: es el mismo elemento en todas las páginas, así que el sitio nunca muestra más de dos cintas a la vez.
 
@@ -134,7 +134,7 @@ Reglas: textura siempre por debajo del 20 % de opacidad; máximo **una** mancha 
 1. Hero: la hoja de orden llenada a mano (placa, falla, firma).
 2. Lista de precios: "incluye filtro ✓".
 3. Lista de precios: precio tachado corregido "ya bajó".
-4. Pizarrón: "Pruébalo con la placa JAL-482-C" (con filtro de gis).
+4. Pizarrón: "Pruébalo con la placa DEM-482-C" (con filtro de gis).
 5. Equipo: "el Chato no presta su matraca".
 6. Notas de clientes: el único papelito escrito a mano.
 7. FAQ: "Pregunta lo que quieras. Aquí nadie se ríe."

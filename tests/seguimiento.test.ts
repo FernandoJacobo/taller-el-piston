@@ -7,11 +7,11 @@ const orden = (placa: string) => buscarOrden(ordenesDemo, placa)!;
 
 describe('placas', () => {
   it('normaliza espacios, guiones y minúsculas', () => {
-    expect(normalizarPlaca(' jal 482-c ')).toBe('JAL482C');
+    expect(normalizarPlaca(' dem 482-c ')).toBe('DEM482C');
   });
 
   it('encuentra la orden aunque se escriba distinto', () => {
-    expect(buscarOrden(ordenesDemo, 'jal482c')?.folio).toBe('2417');
+    expect(buscarOrden(ordenesDemo, 'dem482c')?.folio).toBe('2417');
     expect(buscarOrden(ordenesDemo, 'XXX-000')).toBeUndefined();
     expect(buscarOrden(ordenesDemo, '   ')).toBeUndefined();
   });
@@ -30,14 +30,14 @@ describe('leerEstado', () => {
   });
 
   it('descarta autorizaciones con valores no numéricos', () => {
-    const e = leerEstado(JSON.stringify({ inicio: 5, autorizaciones: { 'jal-482-c': 10, x: 'y' } }), T0);
-    expect(e).toEqual({ inicio: 5, autorizaciones: { JAL482C: 10 } });
+    const e = leerEstado(JSON.stringify({ inicio: 5, autorizaciones: { 'dem-482-c': 10, x: 'y' } }), T0);
+    expect(e).toEqual({ inicio: 5, autorizaciones: { DEM482C: 10 } });
   });
 });
 
 describe('vistaOrden y autorizar', () => {
   it('ancla el historial al inicio de la demo y lo ordena', () => {
-    const v = vistaOrden(orden('JAL-482-C'), estadoInicial(T0));
+    const v = vistaOrden(orden('DEM-482-C'), estadoInicial(T0));
     expect(v.historial[0].en).toBe(T0 - 230 * 60_000);
     const horas = v.historial.map((e) => e.en);
     expect(horas).toEqual([...horas].sort((a, b) => a - b));
@@ -48,9 +48,9 @@ describe('vistaOrden y autorizar', () => {
 
   it('autorizar pasa la orden a "En reparación" y agrega el evento con hora', () => {
     const demo = estadoInicial(T0);
-    const despues = autorizar(demo, orden('JAL-482-C'), T0 + 60_000);
+    const despues = autorizar(demo, orden('DEM-482-C'), T0 + 60_000);
     expect(demo.autorizaciones).toEqual({}); // no muta
-    const v = vistaOrden(orden('JAL-482-C'), despues);
+    const v = vistaOrden(orden('DEM-482-C'), despues);
     expect(v.estado).toBe('reparacion');
     expect(v.autorizado).toBe(true);
     expect(v.puedeAutorizar).toBe(false);
@@ -58,14 +58,14 @@ describe('vistaOrden y autorizar', () => {
   });
 
   it('autorizar dos veces no cambia nada', () => {
-    const una = autorizar(estadoInicial(T0), orden('JAL-482-C'), T0 + 1);
-    expect(autorizar(una, orden('JAL-482-C'), T0 + 2)).toBe(una);
+    const una = autorizar(estadoInicial(T0), orden('DEM-482-C'), T0 + 1);
+    expect(autorizar(una, orden('DEM-482-C'), T0 + 2)).toBe(una);
   });
 
   it('no se puede autorizar una orden en diagnóstico (sin presupuesto) ni una ya lista', () => {
     const demo = estadoInicial(T0);
-    expect(autorizar(demo, orden('JKL-305-A'), T0)).toBe(demo);
-    expect(autorizar(demo, orden('JNB-226-D'), T0)).toBe(demo);
+    expect(autorizar(demo, orden('DEM-305-A'), T0)).toBe(demo);
+    expect(autorizar(demo, orden('DEM-226-D'), T0)).toBe(demo);
   });
 });
 
@@ -83,6 +83,6 @@ describe('fechaEntrega', () => {
 
 describe('totales', () => {
   it('suma refacciones, mano de obra e IVA', () => {
-    expect(totales(orden('JAL-482-C'))).toEqual({ refacciones: 870, manoObra: 1050, subtotal: 1920, iva: 307, total: 2227 });
+    expect(totales(orden('DEM-482-C'))).toEqual({ refacciones: 870, manoObra: 1050, subtotal: 1920, iva: 307, total: 2227 });
   });
 });

@@ -4,7 +4,7 @@ import { openStatus } from '@/lib/horario';
 import { site } from '@/config/site';
 
 const ok: DatosOrden = {
-  placa: 'jal-482-c',
+  placa: 'dem-482-c',
   marca: 'Nissan',
   modelo: 'Versa',
   anio: '2014',
@@ -37,7 +37,7 @@ describe('mensajeOrden', () => {
   it('formatea el mensaje de WhatsApp como orden de servicio', () => {
     const m = mensajeOrden(ok, '2419');
     expect(m.split('\n')[0]).toBe('*ORDEN DE SERVICIO N.º 2419*');
-    expect(m).toContain('Placa: JAL-482-C');
+    expect(m).toContain('Placa: DEM-482-C');
     expect(m).toContain('Auto: Nissan Versa 2014');
     expect(m).toContain('Kilometraje: 148,320 km');
     expect(m).toContain('Tel.: 3312345678');

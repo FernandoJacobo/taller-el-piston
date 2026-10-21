@@ -1,7 +1,7 @@
 /**
- * Contenido para redes de la demo "Taller Rangel e Hijos".
+ * Contenido para redes de la demo "Taller El Pistón".
  *
- *   npm run social -- [capture] [compose] [video] [--base=https://taller-rangel.pages.dev]
+ *   npm run social -- [capture] [compose] [video] [--base=https://taller-el-piston.pages.dev]
  *
  * - capture: capturas del sitio en celular (390 @3x) y escritorio (1440 @2x) → social/capturas/
  * - compose: posts, story y carrusel (1080×1350 / 1080×1920) con la identidad del taller → social/posts/, social/carrusel/
@@ -30,7 +30,7 @@ const exec = promisify(execFile);
 const MOBILE = { width: 390, height: 844, deviceScaleFactor: 3, isMobile: true, hasTouch: true };
 const DESKTOP = { width: 1440, height: 900, deviceScaleFactor: 2 };
 
-const ORDEN = { placa: 'JAL-482-C', marca: 'Nissan', modelo: 'Versa', anio: '2014', km: '148320', nombre: 'Mariana T.', tel: '33 1234 5678' };
+const ORDEN = { placa: 'DEM-482-C', marca: 'Nissan', modelo: 'Versa', anio: '2014', km: '148320', nombre: 'Mariana T.', tel: '33 1234 5678' };
 
 /** Cada página empieza con la demo de seguimiento limpia (nada autorizado). */
 const freshDemo = (page) => page.evaluateOnNewDocument(() => {
@@ -153,8 +153,8 @@ async function capture() {
   await m({ file: 'movil-orden.png', section: '#orden', offset: 140, before: fillOrder });
   await m({ path: '/servicios', file: 'movil-servicios.png', section: '[data-filtros]', offset: -40 });
   await m({ path: '/presupuesto', file: 'movil-cotizador.png', section: '[data-ticket]', offset: -24, before: quote });
-  await m({ path: '/seguimiento?placa=JAL-482-C', file: 'movil-seguimiento.png', section: '[data-pizarra]', offset: 0 });
-  await m({ path: '/seguimiento?placa=JAL-482-C', file: 'movil-seguimiento-autorizado.png', section: '[data-pizarra]', offset: 0, before: click('[data-autorizar]', 900) });
+  await m({ path: '/seguimiento?placa=DEM-482-C', file: 'movil-seguimiento.png', section: '[data-pizarra]', offset: 0 });
+  await m({ path: '/seguimiento?placa=DEM-482-C', file: 'movil-seguimiento-autorizado.png', section: '[data-pizarra]', offset: 0, before: click('[data-autorizar]', 900) });
   await m({ path: '/contacto', file: 'movil-contacto.png', section: '.indicaciones', offset: -20 });
 
   console.log('Escritorio…');
@@ -169,7 +169,7 @@ async function capture() {
   await d({ file: 'escritorio-orden.png', section: '#orden', offset: -40, before: fillOrder });
   await d({ path: '/servicios', file: 'escritorio-servicios.png', section: '[data-filtros]', offset: -40, before: click('[data-fila] summary', 600) });
   await d({ path: '/presupuesto', file: 'escritorio-cotizador.png', section: 'main', offset: 440, before: quote });
-  await d({ path: '/seguimiento?placa=JAL-482-C', file: 'escritorio-seguimiento.png', section: '[data-pizarra]', offset: -20 });
+  await d({ path: '/seguimiento?placa=DEM-482-C', file: 'escritorio-seguimiento.png', section: '[data-pizarra]', offset: -20 });
   await d({ path: '/contacto', file: 'escritorio-contacto.png', offset: 0 });
   await d({ path: '/no-existe', file: 'escritorio-404.png' });
   await d({ file: 'escritorio-completa.png', full: true });
@@ -243,8 +243,8 @@ function page(w, h, body, cls = '') {
 
 const footer = '<div class="foot"><span>Demo · taller ficticio</span><span><b>JacoboDev</b> · jacobodev.pages.dev</span></div>';
 const tira = (folio, centro = 'Mecánica en general · Guadalajara') =>
-  `<div class="tira"><span class="r">Folio N.º ${folio}</span><span>${centro}</span><span>Taller Rangel e Hijos</span></div>`;
-const placa = '<div class="placa">RANGEL <small>E HIJOS</small></div>';
+  `<div class="tira"><span class="r">Folio N.º ${folio}</span><span>${centro}</span><span>Taller El Pistón</span></div>`;
+const placa = '<div class="placa">PISTÓN <small>TALLER</small></div>';
 
 async function render(browser, html, file, w, h) {
   const p = await browser.newPage();
@@ -274,7 +274,7 @@ async function compose() {
   ];
   const c = Object.fromEntries(await Promise.all(names.map(async (n) => [n, await img(`${n}.png`)])));
   const browserFrame = (src, extra = '') =>
-    `<div class="browser" style="${extra}"><div class="bar"><i></i><i></i><i></i><span>taller-rangel.pages.dev</span></div><img src="${src}"></div>`;
+    `<div class="browser" style="${extra}"><div class="bar"><i></i><i></i><i></i><span>taller-el-piston.pages.dev</span></div><img src="${src}"></div>`;
   // Franja arriba de la captura para que el notch no tape el encabezado del sitio.
   const phone = (src, w, extra = '') => `<div class="phone" style="width:${w}px;${extra}"><div class="screen"><img src="${src}"></div></div>`;
 
@@ -705,7 +705,7 @@ async function record({ name, viewport, scale, size, fps = 30, vars, coverAt = 1
 }
 
 const MOBILE_VIDEO = { viewport: { width: 390, height: 693, isMobile: true, hasTouch: true }, scale: 1080 / 390, size: [1080, 1920] };
-const PLACA = '<span class="pl">RANGEL <small>E HIJOS</small></span>';
+const PLACA = '<span class="pl">PISTÓN <small>TALLER</small></span>';
 
 async function introCard(rec, { kicker, title, text }) {
   await rec.card(`${PLACA}<p class="k">${kicker}</p><h2>${title}</h2><p class="t">${text}</p><p class="by">Demo por JacoboDev · taller ficticio</p>`);
@@ -736,7 +736,7 @@ async function buildQuote(rec) {
 async function video() {
   console.log('Reel 9:16 · interacciones…');
   await record({
-    name: 'rangel-reel-interacciones-9x16',
+    name: 'piston-reel-interacciones-9x16',
     ...MOBILE_VIDEO,
     coverAt: 2,
     async script(rec) {
@@ -781,7 +781,7 @@ async function video() {
       await rec.caption('Seguimiento por placa');
       await rec.go(`${BASE}/seguimiento`);
       await rec.hold(0.4);
-      await rec.tap('[data-placa="JAL-482-C"]', { sec: 1 });
+      await rec.tap('[data-placa="DEM-482-C"]', { sec: 1 });
       await rec.scrollToSel('[data-pizarra]', 0, 1.4);
       await rec.hold(0.6);
       await rec.caption('Autorizas con un botón');
@@ -797,7 +797,7 @@ async function video() {
 
   console.log('Reel 9:16 · recorrido…');
   await record({
-    name: 'rangel-reel-recorrido-9x16',
+    name: 'piston-reel-recorrido-9x16',
     ...MOBILE_VIDEO,
     async script(rec) {
       await rec.go(`${BASE}/`, { fade: false });
@@ -816,14 +816,14 @@ async function video() {
 
   console.log('Video 16:9 · escritorio…');
   await record({
-    name: 'rangel-recorrido-16x9',
+    name: 'piston-recorrido-16x9',
     viewport: { width: 1440, height: 810 },
     scale: 1920 / 1440,
     size: [1920, 1080],
     vars: { '--cap-top': '96px', '--cap-size': '19px', '--card-pad': '160px', '--h': '96px', '--p': '24px', '--k': '17px', '--pl': '60px', '--url': '24px', '--by': '16px', '--cinta-b': '110px', '--cinta-h': '46px' },
     async script(rec) {
       await rec.go(`${BASE}/`, { fade: false });
-      await introCard(rec, { kicker: 'Sitio web · Taller mecánico', title: 'Taller Rangel e Hijos:<br>sitio para un <b>taller de barrio</b>', text: 'Astro · Tailwind · Lighthouse 95–100 en celular' });
+      await introCard(rec, { kicker: 'Sitio web · Taller mecánico', title: 'Taller El Pistón:<br>sitio para un <b>taller de barrio</b>', text: 'Astro · Tailwind · Lighthouse 95–100 en celular' });
       await rec.hold(2.2);
       await rec.cardOut();
       await rec.hold(1.4);
@@ -859,7 +859,7 @@ async function video() {
       await buildQuote(rec);
       await rec.hold(1.2);
       await rec.caption('Seguimiento por placa');
-      await rec.go(`${BASE}/seguimiento?placa=JAL-482-C`);
+      await rec.go(`${BASE}/seguimiento?placa=DEM-482-C`);
       await rec.scrollToSel('[data-pizarra]', -20, 1.4);
       await rec.hold(0.8);
       await rec.tap('[data-autorizar]', { sec: 1.6 });

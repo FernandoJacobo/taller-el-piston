@@ -14,16 +14,16 @@ export interface OpeningSlot {
 }
 
 export const site = {
-  name: 'Taller Rangel e Hijos',
+  name: 'Taller El Pistón',
   /** Palabra que se pinta en el rótulo gigante del footer y en el logo */
-  rotulo: 'RANGEL',
-  rotuloSub: 'e Hijos',
-  legalName: 'Taller Rangel e Hijos — Mecánica en general',
+  rotulo: 'PISTÓN',
+  rotuloSub: 'Taller',
+  legalName: 'Taller El Pistón — Mecánica en general',
   tagline: 'Mecánica en general desde 1994',
   slogan: 'Primero se revisa; luego se habla de dinero.',
   description:
-    'Taller mecánico de barrio en la colonia San Carlos, Guadalajara. Frenos, suspensión, afinación, clutch, A/C y diagnóstico computarizado. Revisión sin costo si la reparación se hace aquí; presupuesto por escrito y garantía de 3 meses.',
-  url: 'https://taller-rangel.pages.dev',
+    'Taller mecánico de barrio en Guadalajara. Frenos, suspensión, afinación, clutch, A/C y diagnóstico computarizado. Revisión sin costo si la reparación se hace aquí; presupuesto por escrito y garantía de 3 meses.',
+  url: 'https://taller-el-piston.pages.dev',
   locale: 'es-MX',
   ogLocale: 'es_MX',
   currency: 'MXN',
@@ -31,29 +31,29 @@ export const site = {
   foundingYear: 1994,
 
   contact: {
-    phoneDisplay: '33 3826 0194',
+    phoneDisplay: '33 0000 0000',
     /** Formato E.164 para enlaces tel: */
-    phone: '+523338260194',
+    phone: '+523300000000',
     /** WhatsApp en formato internacional sin "+" ni espacios (para wa.me) */
-    whatsapp: '523338260194',
-    email: 'mostrador@taller-rangel-demo.mx',
+    whatsapp: '523300000000',
+    email: 'mostrador@taller-el-piston.example',
   },
 
   address: {
-    street: 'Calle Gigantes 1874',
-    neighborhood: 'Col. San Carlos',
+    street: 'Calle Biela 120',
+    neighborhood: 'Col. Los Talleres',
     city: 'Guadalajara',
     region: 'Jalisco',
-    postalCode: '44460',
+    postalCode: '44100',
     country: 'MX',
-    reference: 'Sobre Gigantes, casi esquina con Calle 46: el portón verde con el rótulo rojo. Si ves la llantera de la esquina, ya te pasaste.',
+    reference: 'Sobre Biela, casi esquina con Cigüeñal: el portón verde con el rótulo rojo. Si ves la llantera de la esquina, ya te pasaste.',
     /** Calles que se dibujan en el croquis (src/components/ui/Croquis.astro) */
-    croquis: { calle: 'C. Gigantes', cruce: 'Calle 46', avenida: 'Av. Revolución', esquina: 'llantera', parada: 'parada' },
+    croquis: { calle: 'C. Biela', cruce: 'C. Cigüeñal', avenida: 'Av. Principal', esquina: 'llantera', parada: 'parada' },
     parking: 'Cabemos 6 autos adentro mientras esperas tu diagnóstico. Sobre la calle hay lugar casi siempre después de las 10 a. m.',
-    transit: 'Si dejas el auto y te vas: la parada de camión de Av. Revolución está a dos cuadras.',
+    transit: 'Si dejas el auto y te vas: la parada de camión de la avenida principal está a dos cuadras.',
   },
 
-  geo: { lat: 20.6554, lng: -103.3297 },
+  geo: { lat: 20.6597, lng: -103.3496 },
 
   /** Horario semanal. Un arreglo vacío = cerrado. */
   hours: {

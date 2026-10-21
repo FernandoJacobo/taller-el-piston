@@ -1,12 +1,12 @@
-# Copys para redes · Demo Taller Rangel e Hijos
+# Copys para redes · Demo Taller El Pistón
 
 > El taller, los mecánicos, los precios, las órdenes y las reseñas son **ficticios**. Preséntalo como demo o plantilla, no como trabajo para un cliente real.
 
 | Archivo | Formato | Uso |
 | --- | --- | --- |
-| `video/rangel-reel-interacciones-9x16.mp4` | 1080×1920 | Reel / TikTok / Shorts principal (diagnóstico, precios, odómetro, sellos, cotizador y seguimiento) |
-| `video/rangel-reel-recorrido-9x16.mp4` | 1080×1920 | Reel de recorrido con scroll suave; también para estado de WhatsApp (recórtalo a 30 s) |
-| `video/rangel-recorrido-16x9.mp4` | 1920×1080 | LinkedIn / YouTube / Facebook |
+| `video/piston-reel-interacciones-9x16.mp4` | 1080×1920 | Reel / TikTok / Shorts principal (diagnóstico, precios, odómetro, sellos, cotizador y seguimiento) |
+| `video/piston-reel-recorrido-9x16.mp4` | 1080×1920 | Reel de recorrido con scroll suave; también para estado de WhatsApp (recórtalo a 30 s) |
+| `video/piston-recorrido-16x9.mp4` | 1920×1080 | LinkedIn / YouTube / Facebook |
 | `video/*-portada.jpg` | 9:16 y 16:9 | Portada del video |
 | `carrusel/01.jpg` … `08.jpg` | 1080×1350 | Carrusel de Instagram / documento de LinkedIn |
 | `posts/01-post-escritorio-movil.jpg` | 1080×1350 | Post individual |
@@ -91,7 +91,7 @@ Texto sugerido para el sticker: **"¿Así se vería tu taller?"** + sticker de e
 
 ## LinkedIn · video 16:9
 
-Nuevo caso de diseño web: **Taller Rangel e Hijos**, un taller mecánico de barrio (demo con datos ficticios).
+Nuevo caso de diseño web: **Taller El Pistón**, un taller mecánico de barrio (demo con datos ficticios).
 
 El reto era evitar el sitio "genérico de plantilla" que tienen casi todos los talleres. La dirección de arte sale de los papeles del propio taller: la orden de servicio con folio, los sellos de goma, la lista de precios de la pared y el pizarrón con gis.
 

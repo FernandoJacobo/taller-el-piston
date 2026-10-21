@@ -18,7 +18,7 @@ test.describe('Orden de servicio', () => {
     await page.goto('/contacto');
     await page.getByRole('button', { name: 'Firmar y mandar por WhatsApp' }).click();
     await expect(page.locator('[data-resumen]')).toContainText('Faltan');
-    await page.fill('#o-placa', 'jal-482-c');
+    await page.fill('#o-placa', 'dem-482-c');
     await page.fill('#o-marca', 'Nissan');
     await page.fill('#o-modelo', 'Versa');
     await page.fill('#o-anio', '2014');
@@ -29,7 +29,7 @@ test.describe('Orden de servicio', () => {
     await page.getByRole('button', { name: 'Firmar y mandar por WhatsApp' }).click();
     const wa = await popup;
     expect(decodeURIComponent(wa.url().replaceAll('+', ' '))).toContain('ORDEN DE SERVICIO');
-    expect(decodeURIComponent(wa.url().replaceAll('+', ' '))).toContain('Placa: JAL-482-C');
+    expect(decodeURIComponent(wa.url().replaceAll('+', ' '))).toContain('Placa: DEM-482-C');
   });
 });
 
@@ -54,8 +54,8 @@ test.describe('Seguimiento por placa', () => {
     const b = await context.newPage();
     await a.goto('/seguimiento');
     await a.getByRole('button', { name: 'Restablecer demo' }).click();
-    await a.getByRole('button', { name: 'JAL-482-C' }).click();
-    await b.goto('/seguimiento?placa=JAL-482-C');
+    await a.getByRole('button', { name: 'DEM-482-C' }).click();
+    await b.goto('/seguimiento?placa=DEM-482-C');
     await expect(b.locator('[aria-current="step"]')).toContainText('Autorización');
 
     await a.getByRole('button', { name: 'Autorizar reparación' }).click();
@@ -91,7 +91,7 @@ test.describe('Responsive', () => {
   for (const ancho of [360, 390, 768, 1024, 1280, 1536]) {
     test(`sin scroll horizontal a ${ancho}px`, async ({ page }) => {
       await page.setViewportSize({ width: ancho, height: 900 });
-      for (const ruta of ['/', '/servicios', '/presupuesto', '/seguimiento?placa=JHT-917-B', '/contacto', '/404']) {
+      for (const ruta of ['/', '/servicios', '/presupuesto', '/seguimiento?placa=DEM-917-B', '/contacto', '/404']) {
         await page.goto(ruta);
         const sobra = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
         expect(sobra, `${ruta} @${ancho}`).toBeLessThanOrEqual(0);

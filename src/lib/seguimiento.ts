@@ -5,7 +5,7 @@
 import { estados, type EstadoId, type OrdenDemo } from '@/data/ordenes';
 import { IVA } from '@/lib/cotizador';
 
-export const CLAVE_DEMO = 'rangel:seguimiento:v1';
+export const CLAVE_DEMO = 'piston:seguimiento:v1';
 
 /** Lo único que se guarda en localStorage */
 export interface EstadoDemo {
@@ -29,7 +29,7 @@ export interface OrdenVista extends Omit<OrdenDemo, 'historial'> {
   entrega: number;
 }
 
-/** "jal 482c", "JAL-482-C" y "jal482c" son la misma placa. */
+/** "dem 482c", "DEM-482-C" y "dem482c" son la misma placa. */
 export const normalizarPlaca = (placa: string) => placa.toUpperCase().replace(/[^A-Z0-9]/g, '');
 
 export const pasoDe = (estado: EstadoId) => estados.findIndex((e) => e.id === estado);

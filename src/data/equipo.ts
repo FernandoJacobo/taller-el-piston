@@ -22,17 +22,17 @@ export interface Mecanico {
 
 export const equipo: Mecanico[] = [
   {
-    nombre: 'Ramiro Rangel',
+    nombre: 'Ramiro Ortiz',
     apodo: 'El Patrón',
     desde: 1983,
     especialidad: 'Motor y ruidos raros. Diagnostica con el oído antes que con el escáner.',
-    herramienta: 'Una Stillson de 1987 que heredó de su maestro en la calle Medrano.',
+    herramienta: 'Una Stillson de 1987 que heredó del maestro que le enseñó el oficio.',
     frase: '“Si me lo traes a tiempo, te sale barato.”',
     foto: stillson,
     fotoAlt: 'Llave Stillson y llave ajustable sobre fondo oscuro',
   },
   {
-    nombre: 'Iván Rangel',
+    nombre: 'Iván Ortiz',
     apodo: 'El Chato',
     desde: 2006,
     especialidad: 'Frenos, suspensión y dirección. Si truena en los topes, es suyo.',
@@ -52,10 +52,10 @@ export const equipo: Mecanico[] = [
     fotoAlt: 'Mano sosteniendo un multímetro digital amarillo',
   },
   {
-    nombre: 'Daniela Rangel',
+    nombre: 'Daniela Ortiz',
     apodo: 'La Inge',
     desde: 2017,
-    especialidad: 'Aire acondicionado y transmisiones automáticas. Ingeniera mecánica por la UdeG.',
+    especialidad: 'Aire acondicionado y transmisiones automáticas. Ingeniera mecánica titulada.',
     herramienta: 'El juego de manómetros del A/C. Les puso su nombre con plumón.',
     frase: '“Cargar gas sin buscar la fuga es tirar dinero.”',
     foto: manometro,

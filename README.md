@@ -1,6 +1,6 @@
-# Taller Rangel e Hijos: demo
+# Taller El Pistón: demo
 
-Sitio de demostración de un taller mecánico de barrio en la colonia San Carlos, Guadalajara. El taller, los mecánicos, los precios, las órdenes y las reseñas son ficticios.
+Sitio de demostración de un taller mecánico de barrio en Guadalajara. El taller, los mecánicos, los precios, las órdenes y las reseñas son ficticios.
 
 > Primero se revisa; luego se habla de dinero.
 
@@ -17,7 +17,7 @@ La dirección de arte completa está en [`DISENO.md`](DISENO.md) y la revisión 
 | `/` | Encabezado de orden con estado abierto/cerrado calculado, diagnóstico por síntoma (10 síntomas con causas, urgencia, revisiones caseras y rango de precio), lista de pared, pizarrón con odómetro, compromisos sellados, equipo, notas de clientes, preguntas y orden de servicio que abre WhatsApp |
 | `/servicios` | Los 34 servicios agrupados por sistema, con filtro, buscador y filas que se abren |
 | `/presupuesto` | Cotizador: tipo de auto, servicios y tipo de refacción. Separa refacciones y mano de obra, calcula tiempo e IVA opcional, y saca una nota de taller que se manda por WhatsApp o se imprime |
-| `/seguimiento` | Seguimiento por placa con 4 placas de prueba (`JAL-482-C`, `JKL-305-A`, `JHT-917-B`, `JNB-226-D`). "Autorizar" se guarda en el navegador y se sincroniza entre pestañas |
+| `/seguimiento` | Seguimiento por placa con 4 placas de prueba (`DEM-482-C`, `DEM-305-A`, `DEM-917-B`, `DEM-226-D`). "Autorizar" se guarda en el navegador y se sincroniza entre pestañas |
 | `/contacto` | Cómo llegar, croquis, grúa, horario y orden de servicio |
 | `/aviso-de-privacidad`, 404 | "Esta página está en el elevador" |
 

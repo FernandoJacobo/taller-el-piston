@@ -52,7 +52,7 @@ export const estados: { id: EstadoId; nombre: string; corto: string }[] = [
 export const ordenesDemo: OrdenDemo[] = [
   {
     folio: '2417',
-    placa: 'JAL-482-C',
+    placa: 'DEM-482-C',
     auto: 'Sedán 2014 · 4 cilindros',
     color: 'Gris plata',
     km: 148_320,
@@ -85,7 +85,7 @@ export const ordenesDemo: OrdenDemo[] = [
   },
   {
     folio: '2418',
-    placa: 'JKL-305-A',
+    placa: 'DEM-305-A',
     auto: 'Pickup 2019 · doble cabina',
     color: 'Blanco',
     km: 92_100,
@@ -107,7 +107,7 @@ export const ordenesDemo: OrdenDemo[] = [
   },
   {
     folio: '2409',
-    placa: 'JHT-917-B',
+    placa: 'DEM-917-B',
     auto: 'SUV 2017 · automática',
     color: 'Rojo',
     km: 121_870,
@@ -138,7 +138,7 @@ export const ordenesDemo: OrdenDemo[] = [
   },
   {
     folio: '2402',
-    placa: 'JNB-226-D',
+    placa: 'DEM-226-D',
     auto: 'Compacto 2012 · estándar',
     color: 'Azul',
     km: 203_450,

@@ -1,4 +1,4 @@
-# Auditoría de diseño: Taller Rangel e Hijos
+# Auditoría de diseño: Taller El Pistón
 
 Revisión del sitio terminado contra `DISENO.md` y la lista negra del encargo. Hecha con capturas de Playwright a 360, 390, 768, 1024, 1280, 1440 y 1536 px (`npm run qa`), Lighthouse móvil y búsquedas en el código.
 
@@ -18,7 +18,7 @@ Revisión del sitio terminado contra `DISENO.md` y la lista negra del encargo. H
 | — | Marquee | Tira de servicios a 60 s | Cinta de rotular | 1 permitido; se pausa con el mouse y con `reduced-motion` |
 | I | Preguntas | Columna angosta de casillas ☐/☒ (`<details>`) y vacío intencional a la derecha con una nota de plumón | Renglones de formulario | Sin acordeón con chevrons ni sombras |
 | J | Orden de servicio | Hoja con talón desprendible y perforación; abre WhatsApp y tiene salida por correo | Líneas para llenar, tinta de pluma, sello "Conserve este talón" | Sin formulario de tarjeta flotante |
-| K | Footer | Cinta 2, tabla de horario, croquis dibujado pegado con cinta y "RANGEL" a 35 vw cortado por el borde inferior | Grasa, cinta, croquis | Sin cuatro columnas de enlaces genéricos |
+| K | Footer | Cinta 2, tabla de horario, croquis dibujado pegado con cinta y "PISTÓN" a 35 vw cortado por el borde inferior | Grasa, cinta, croquis | Sin cuatro columnas de enlaces genéricos |
 
 Son 11 composiciones distintas en el inicio (se pedían al menos 6).
 
