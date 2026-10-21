@@ -1,5 +1,5 @@
 ---
-/** Sello redondo "REVISIÓN SIN COSTO" que gira lento (se detiene con prefers-reduced-motion). */
+/** Sello redondo "REVISIÓN SIN COSTO". Se estampa una vez al entrar en vista (data-estampa), no gira. */
 interface Props {
   class?: string;
 }
@@ -7,7 +7,7 @@ const { class: clase = '' } = Astro.props;
 const id = `aro-${Math.random().toString(36).slice(2, 7)}`;
 ---
 
-<div class:list={['sello-giro', clase]} role="img" aria-label="Sello: revisión sin costo si se repara aquí">
+<div class:list={['sello-giro', clase]} style="--r:-12deg; --delay:0.5s" data-estampa role="img" aria-label="Sello: revisión sin costo si se repara aquí">
   <svg viewBox="0 0 200 200" aria-hidden="true">
     <defs>
       <path id={id} d="M100 100 m-74 0 a74 74 0 1 1 148 0 a74 74 0 1 1 -148 0"></path>
@@ -27,7 +27,7 @@ const id = `aro-${Math.random().toString(36).slice(2, 7)}`;
   .sello-giro {
     color: var(--oxido);
     aspect-ratio: 1;
-    rotate: -12deg;
+    rotate: var(--r);
     mask-image: var(--tinta-gastada);
     mask-size: 160px;
     -webkit-mask-image: var(--tinta-gastada);
@@ -56,15 +56,4 @@ const id = `aro-${Math.random().toString(36).slice(2, 7)}`;
     transform-origin: 100px 100px;
   }
 
-  @media (prefers-reduced-motion: no-preference) {
-    .aro {
-      animation: girar 40s linear infinite;
-    }
-  }
-
-  @keyframes girar {
-    to {
-      rotate: 360deg;
-    }
-  }
 </style>

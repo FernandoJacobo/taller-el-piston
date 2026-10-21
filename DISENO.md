@@ -70,7 +70,7 @@ El contraste de **tamaño** es el protagonista: un titular de 17 vw junto a un p
 | # | Sección | Composición | Retícula |
 |---|---|---|---|
 | A | Encabezado de orden | **Tira de formulario**: celdas con bordes como el encabezado impreso de una orden (folio · fecha · horario · estado) + navegación de texto subrayado | tabla de 4 celdas desiguales |
-| B | Hero | **Titular desbordado + hoja encimada**: "SI SUENA RARO, NO ES NORMAL." a 17 vw alineado a la izquierda que se sale por la derecha; la orden de servicio llenada a mano se monta encima, rotada +2°, con cinta; sello giratorio que muerde la orilla de la hoja; llave de cruz gigante cruzando detrás | 12 col: titular 1–13 (desborda), hoja 8–12 encimada |
+| B | Hero | **Titular desbordado + hoja encimada**: "SI SUENA RARO, NO ES NORMAL." a 17 vw alineado a la izquierda que se sale por la derecha; la orden de servicio llenada a mano se monta encima, rotada +2°, con cinta; sello redondo que muerde la orilla de la hoja; llave de cruz gigante cruzando detrás | 12 col: titular 1–13 (desborda), hoja 8–12 encimada |
 | C | Diagnóstico | **Índice + expediente**: lista tipográfica numerada 01–10 a la izquierda (tamaño de rótulo M, como índice de manual), expediente de papel *sticky* a la derecha con medidor | 5 / 7, el expediente se pega |
 | D | Lista de precios | **Pared con título vertical**: "PRECIOS" vertical a 90° pegado al borde izquierdo, hoja de lista a dos columnas atornillada a la pared, nota de plumón en la esquina | título 1 col / hoja 10 col desplazada |
 | E | Pizarrón | **Sangrado oscuro con columnas a gis**: tablero `--grasa` a todo lo ancho, odómetro arriba a la izquierda, 5 columnas de estado con tiras magnéticas, invitación escrita con gis abajo a la derecha | 5 columnas de pizarrón |
@@ -81,7 +81,7 @@ El contraste de **tamaño** es el protagonista: un titular de 17 vw junto a un p
 | J | Orden de servicio (CTA) | **Hoja con talón desprendible**: formulario a la izquierda, talón perforado a la derecha con el folio y "conserve este talón" | 9 / 3 con perforación vertical |
 | K | Footer | **Rótulo gigante cortado**: "RANGEL" a 30 vw cortado por el borde inferior, datos en tabla mono arriba, mapa con marco de foto pegada | 3 bloques + rótulo a sangre |
 
-Entre B y C va la **cinta de precaución 1**; entre H e I corre el **marquee** único; antes del footer va la **cinta de precaución 2** (en `/servicios` no hay cinta).
+Entre B y C va la **cinta de precaución 1**; entre H e I corre el **marquee** único; la **cinta de precaución 2** es la orilla superior del footer: es el mismo elemento en todas las páginas, así que el sitio nunca muestra más de dos cintas a la vez.
 
 ### Móvil (no se apila sin más)
 
@@ -110,6 +110,7 @@ Trazo `stroke-width: 3` en viewBox 120, `stroke-linecap: round`, `stroke-linejoi
 | `ventilador` | ventilador de condensador con copo | A/C |
 | `llanta` | llanta de perfil con dibujo | Llantas |
 | `flecha` | flecha a mano | notas de plumón |
+| croquis | calles, manzanas, llantera, parada y una X en óxido (`Croquis.astro`, datos en `site.address.croquis`) | contacto y footer; el mapa de OpenStreetMap solo carga al pedirlo |
 
 ## 5. Materiales y texturas
 
@@ -126,7 +127,7 @@ Trazo `stroke-width: 3` en viewBox 120, `stroke-linecap: round`, `stroke-linejoi
 | Gis | texto `--gis` + filtro `#gis` (turbulencia leve) | SVG |
 | Fotos | duotono `grayscale + contrast` + capa `--kraft` en `multiply` y `--grasa` en `screen`, recorte `clip-path` irregular, trama `radial-gradient` de puntos encima | CSS |
 
-Reglas: textura siempre por debajo del 20 % de opacidad; máximo **una** mancha de grasa por pantalla; cinta solo en notas y la hoja del hero.
+Reglas: textura siempre por debajo del 20 % de opacidad; máximo **una** mancha de grasa por pantalla; cinta adhesiva solo en notas, la hoja del hero, "Cómo llegar" y los marcos del croquis.
 
 ## 6. Notas de plumón (máximo 8)
 
@@ -145,10 +146,9 @@ Lo llenado "con pluma" en formularios y talones usa IBM Plex Mono en tinta `--pl
 
 | Animación | Dónde | Detalle |
 |---|---|---|
-| Sello que se estampa | sellos de "Lo que firmamos", sello del ticket | `scale(1.4) rotate(-8°)` → `scale(1) rotate(var(--r))`, rebote 0.96, sombra 6 px → 1 px; una sola vez |
+| Sello que se estampa | sellos de "Lo que firmamos", sello "REVISIÓN SIN COSTO" del hero, sello del ticket | `scale(1.4) rotate(-8°)` → `scale(1) rotate(var(--r))`, rebote 0.96, sombra 6 px → 1 px; una sola vez |
 | Odómetro | pizarrón | rodillos 0–9 por dígito, cada rodillo con distinto retraso y vueltas extra (las unidades giran más) |
 | Botón táctil | todos los `.btn` | `:active` → `translate(3px,3px)` y sombra 4 px → 1 px |
-| Sello giratorio | hero ("REVISIÓN SIN COSTO") | rotación lenta 40 s; se detiene con `prefers-reduced-motion` |
 | Cinta de precaución | 2 lugares | estática (las franjas no se mueven) |
 | Marquee | 1 lugar | 60 s, pausa al pasar el mouse y con `reduced-motion` |
 
