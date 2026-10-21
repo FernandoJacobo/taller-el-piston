@@ -36,7 +36,7 @@ const activo = (href: string) => {
       <div class="celda horario">
         <dt>Horario</dt>
         <dd>
-          L–V {formatTime(semana.open)}–{formatTime(semana.close)} · Sáb {formatTime(sabado.open)}–{formatTime(sabado.close)}
+          <span class="tramo">L–V {formatTime(semana.open)}–{formatTime(semana.close)}</span> · <span class="tramo">Sáb {formatTime(sabado.open)}–{formatTime(sabado.close)}</span>
           <br /><a class="subrayado" href={`tel:${site.contact.phone}`}>Tel. {site.contact.phoneDisplay}</a>
         </dd>
       </div>
@@ -199,6 +199,10 @@ const activo = (href: string) => {
     padding-bottom: 0.4rem;
   }
 
+  .tramo {
+    white-space: nowrap;
+  }
+
   .marca {
     text-decoration: none;
     margin-left: 0.6rem;
@@ -254,6 +258,7 @@ const activo = (href: string) => {
 
     .horario a {
       margin-left: 0.75rem;
+      white-space: nowrap;
     }
   }
 

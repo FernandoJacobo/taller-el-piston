@@ -35,7 +35,7 @@ for (const ruta of rutas) {
       document.documentElement.style.scrollBehavior = 'auto';
       for (let y = 0; y < document.body.scrollHeight; y += 600) {
         window.scrollTo(0, y);
-        await new Promise((r) => setTimeout(r, 60));
+        await new Promise((r) => setTimeout(r, 140));
       }
       window.scrollTo(0, 0);
     });
